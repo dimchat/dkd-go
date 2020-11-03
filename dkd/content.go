@@ -31,8 +31,9 @@
 package dkd
 
 import (
-	"dkd-go/protocol"
-	"dkd-go/types"
+	. "github.com/dimchat/dkd-go/protocol"
+	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/types"
 	"math/rand"
 	"time"
 )
@@ -55,12 +56,12 @@ import (
  *  }
  */
 type Content struct {
-	types.Dictionary
+	Dictionary
 
 	_delegate *MessageDelegate
 
 	// message type: text, image, ...
-	_type protocol.ContentType
+	_type ContentType
 
 	// serial number: random number to identify message content
 	_sn uint32
@@ -69,21 +70,22 @@ type Content struct {
 	_time time.Time
 
 	// extra info
-	_group interface{}
+	_group *ID
 }
 
-func (content *Content)LoadContent(dictionary *map[string]interface{}) *Content {
-	if content.LoadDictionary(dictionary) != nil {
+func (content *Content)Init(dictionary map[string]interface{}) *Content {
+	if content.Dictionary.Init(dictionary) != nil {
 		// lazy load
 		content._type = 0
 		content._sn = 0
 		content._time = time.Unix(0, 0)
+		content._group = nil
 	}
 	return content
 }
 
-func (content *Content) InitContent(t protocol.ContentType) *Content {
-	if content.InitDictionary() != nil {
+func (content *Content) InitWithType(t ContentType) *Content {
+	if content.Dictionary.Init(nil) != nil {
 		// message time
 		now := time.Now()
 		stamp := now.Unix()
@@ -110,10 +112,10 @@ func (content *Content) SetDelegate(delegate *MessageDelegate) {
 	content._delegate = delegate
 }
 
-func (content *Content) GetType() protocol.ContentType {
+func (content *Content) GetType() ContentType {
 	if content._type == 0 {
 		t := content.Get("type")
-		content._type = protocol.ContentType(t.(uint8))
+		content._type = ContentType(t.(uint8))
 	}
 	return content._type
 }
@@ -138,7 +140,7 @@ func (content *Content) GetTime() time.Time {
 
 // Group ID/string for group message
 //    if field 'group' exists, it means this is a group message
-func (content *Content) GetGroup() interface{} {
+func (content *Content) GetGroup() *ID {
 	if content._group == nil {
 		group := content.Get("group")
 		if group != nil {
@@ -149,7 +151,7 @@ func (content *Content) GetGroup() interface{} {
 	return content._group
 }
 
-func (content *Content) SetGroup(group interface{})  {
-	content.Set("group", group.(string))
+func (content *Content) SetGroup(group *ID)  {
+	content.Set("group", group.String.String())
 	content._group = group
 }

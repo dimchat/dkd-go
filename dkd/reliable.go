@@ -30,6 +30,10 @@
  */
 package dkd
 
+import (
+	. "github.com/dimchat/mkm-go/mkm"
+)
+
 /**
  *  Reliable Message signed by an asymmetric key
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,12 +61,12 @@ type ReliableMessage struct {
 	_signature []byte
 }
 
-func CreateReliableMessage(dictionary *map[string]interface{}) *ReliableMessage {
-	return new(ReliableMessage).LoadReliableMessage(dictionary)
+func CreateReliableMessage(dictionary map[string]interface{}) *ReliableMessage {
+	return new(ReliableMessage).Init(dictionary)
 }
 
-func (msg *ReliableMessage)LoadReliableMessage(dictionary *map[string]interface{}) *ReliableMessage {
-	if msg.LoadMessage(dictionary) != nil {
+func (msg *ReliableMessage)Init(dictionary map[string]interface{}) *ReliableMessage {
+	if msg.SecureMessage.Init(dictionary) != nil {
 		// lazy load
 		msg._signature = nil
 	}
@@ -76,15 +80,15 @@ func (msg *ReliableMessage) GetDelegate() *ReliableMessageDelegate {
 }
 
 func (msg *ReliableMessage) SetDelegate(delegate *ReliableMessageDelegate) {
-	handler := (MessageDelegate)(*delegate)
+	handler := (*delegate).(MessageDelegate)
 	msg.GetEnvelope().SetDelegate(&handler)
 }
 
 func (msg *ReliableMessage) GetSignature() []byte {
 	if msg._signature == nil {
 		base64 := msg.Get("signature")
-		handler := *msg.GetDelegate()
-		msg._signature = handler.DecodeSignature(base64.(string), msg)
+		handler := msg.GetDelegate()
+		msg._signature = (*handler).DecodeSignature(base64.(string), msg)
 	}
 	return msg._signature
 }
@@ -104,8 +108,18 @@ func (msg *ReliableMessage) GetMeta() map[string]interface{} {
 	return value.(map[string]interface{})
 }
 
-func (msg *ReliableMessage) SetMeta(meta map[string]interface{}) {
-	msg.Set("meta", meta)
+func (msg *ReliableMessage) SetMeta(meta interface{}) {
+	ptr, ok := meta.(*Meta)
+	if !ok {
+		obj, ok := meta.(Meta)
+		if !ok {
+			// map[string]interface{}
+			msg.Set("meta", meta)
+			return
+		}
+		ptr = &obj
+	}
+	msg.Set("meta", (*ptr).GetMap(false))
 }
 
 /**
@@ -123,8 +137,18 @@ func (msg *ReliableMessage) GetProfile() map[string]interface{} {
 	return value.(map[string]interface{})
 }
 
-func (msg *ReliableMessage) SetProfile(profile map[string]interface{}) {
-	msg.Set("profile", profile)
+func (msg *ReliableMessage) SetProfile(profile interface{}) {
+	ptr, ok := profile.(*Profile)
+	if !ok {
+		obj, ok := profile.(Profile)
+		if !ok {
+			// map[string]interfaces{}
+			msg.Set("profile", profile)
+			return
+		}
+		ptr = &obj
+	}
+	msg.Set("profile", (*ptr).GetMap(false))
 }
 
 /*
@@ -157,12 +181,12 @@ func (msg *ReliableMessage) Verify() *SecureMessage {
 	}
 	sender := msg.GetSender()
 	// 1. verify data signature with sender's public key
-	handler := *msg.GetDelegate()
-	if handler.VerifyDataSignature(data, signature, sender, msg) {
+	handler := msg.GetDelegate()
+	if (*handler).VerifyDataSignature(data, signature, sender, msg) {
 		// 2. pack message
-		info := msg.CopyMap()
+		info := msg.GetMap(true)
 		delete(info, "signature")
-		return CreateSecureMessage(&info)
+		return CreateSecureMessage(info)
 	} else {
 		//panic("message signature not match")
 		return nil

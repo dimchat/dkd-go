@@ -31,7 +31,8 @@
 package dkd
 
 import (
-	"dkd-go/types"
+	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/types"
 	"unsafe"
 )
 
@@ -58,20 +59,20 @@ type SecureMessage struct {
 
 	_data []byte
 	_key []byte
-	_keys map[interface{}]string
+	_keys map[string]string
 }
 
-func CreateSecureMessage(dictionary *map[string]interface{}) *SecureMessage {
-	if _, exists := (*dictionary)["signature"]; exists {
+func CreateSecureMessage(dictionary map[string]interface{}) *SecureMessage {
+	if _, exists := dictionary["signature"]; exists {
 		// this should be a reliable message
-		msg := new(ReliableMessage).LoadReliableMessage(dictionary)
+		msg := new(ReliableMessage).Init(dictionary)
 		return (*SecureMessage)(unsafe.Pointer(msg))
 	}
-	return new(SecureMessage).LoadSecureMessage(dictionary)
+	return new(SecureMessage).Init(dictionary)
 }
 
-func (msg *SecureMessage)LoadSecureMessage(dictionary *map[string]interface{}) *SecureMessage {
-	if msg.LoadMessage(dictionary) != nil {
+func (msg *SecureMessage)Init(dictionary map[string]interface{}) *SecureMessage {
+	if msg.Message.Init(dictionary) != nil {
 		// lazy load
 		msg._data = nil
 		msg._key = nil
@@ -87,15 +88,15 @@ func (msg *SecureMessage) GetDelegate() *SecureMessageDelegate {
 }
 
 func (msg *SecureMessage) SetDelegate(delegate *SecureMessageDelegate) {
-	handler := (MessageDelegate)(*delegate)
+	handler := (*delegate).(MessageDelegate)
 	msg.GetEnvelope().SetDelegate(&handler)
 }
 
 func (msg *SecureMessage) GetData() []byte {
 	if msg._data == nil {
 		base64 := msg.Get("data")
-		handler := *msg.GetDelegate()
-		msg._data = handler.DecodeData(base64.(string), msg)
+		handler := msg.GetDelegate()
+		msg._data = (*handler).DecodeData(base64.(string), msg)
 	}
 	return msg._data
 }
@@ -107,22 +108,23 @@ func (msg *SecureMessage) GetKey() []byte {
 			// check 'keys'
 			keys := msg.GetKeys()
 			if keys != nil {
-				base64 = keys[msg.GetReceiver()]
+				receiver := msg.GetReceiver()
+				base64 = keys[receiver.String.String()]
 			}
 		}
 		if base64 != nil {
-			handler := *msg.GetDelegate()
-			msg._key = handler.DecodeKey(base64.(string), msg)
+			handler := msg.GetDelegate()
+			msg._key = (*handler).DecodeKey(base64.(string), msg)
 		}
 	}
 	return msg._key
 }
 
-func (msg *SecureMessage) GetKeys() map[interface{}]string {
+func (msg *SecureMessage) GetKeys() map[string]string {
 	if msg._keys == nil {
 		keys := msg.Get("keys")
 		if keys != nil {
-			msg._keys = keys.(map[interface{}]string)
+			msg._keys = keys.(map[string]string)
 		}
 	}
 	return msg._keys
@@ -148,7 +150,7 @@ func (msg *SecureMessage) GetKeys() map[interface{}]string {
  */
 func (msg *SecureMessage) Decrypt() *InstantMessage {
 	var sender = msg.GetSender()
-	var receiver interface{}
+	var receiver *ID
 	var group = msg.GetGroup()
 	if group == nil {
 		// personal message
@@ -160,19 +162,19 @@ func (msg *SecureMessage) Decrypt() *InstantMessage {
 	}
 
 	// 1. decrypt 'message.key' to symmetric key
-	handler := *msg.GetDelegate()
+	handler := msg.GetDelegate()
 	// 1.1. decode encrypted key data
 	key := msg.GetKey()
 	// 1.2. decrypt key data
 	if key != nil {
-		key = handler.DecryptKey(key, sender, receiver, msg)
+		key = (*handler).DecryptKey(key, sender, receiver, msg)
 		if key == nil {
 			panic("failed to decrypt key in msg")
 		}
 	}
 	// 1.3. deserialize key
 	//      if key is empty, means it should be reused, get it from key cache
-	password := handler.DeserializeKey(key, sender, receiver, msg)
+	password := (*handler).DeserializeKey(key, sender, receiver, msg)
 	if password == nil {
 		panic("failed to get msg key")
 	}
@@ -184,12 +186,12 @@ func (msg *SecureMessage) Decrypt() *InstantMessage {
 		panic("failed to decode content data")
 	}
 	// 2.2. decrypt content data
-	data = handler.DecryptContent(data, password, msg)
+	data = (*handler).DecryptContent(data, password, msg)
 	if data == nil {
 		panic("failed to decrypt data with key")
 	}
 	// 2.3. deserialize content
-	content := handler.DeserializeContent(data, password, msg)
+	content := (*handler).DeserializeContent(data, password, msg)
 	if content == nil {
 		panic("failed to deserialize content")
 	}
@@ -201,12 +203,12 @@ func (msg *SecureMessage) Decrypt() *InstantMessage {
 	//      (do it in 'core' module)
 
 	// 3. pack message
-	info := msg.CopyMap()
+	info := msg.GetMap(true)
 	delete(info, "key")
 	delete(info, "keys")
 	delete(info, "data")
-	info["content"] = content.GetMap()
-	return CreateInstantMessage(&info)
+	info["content"] = content.GetMap(false)
+	return CreateInstantMessage(info)
 }
 
 /*
@@ -229,17 +231,17 @@ func (msg *SecureMessage) Decrypt() *InstantMessage {
  * @return ReliableMessage object
  */
 func (msg *SecureMessage) Sign() *ReliableMessage {
-	handler := *msg.GetDelegate()
+	handler := msg.GetDelegate()
 	sender := msg.GetSender()
 	data := msg.GetData()
 	// 1. sign with sender's private key
-	signature := handler.SignData(data, sender, msg)
+	signature := (*handler).SignData(data, sender, msg)
 	// 2. encode signature
-	base64 := handler.EncodeSignature(signature, msg)
+	base64 := (*handler).EncodeSignature(signature, msg)
 	// 3. pack message
-	info := msg.CopyMap()
+	info := msg.GetMap(true)
 	info["signature"] = base64
-	return CreateReliableMessage(&info)
+	return CreateReliableMessage(info)
 }
 
 /*
@@ -254,12 +256,12 @@ func (msg *SecureMessage) Sign() *ReliableMessage {
  *  @param members - group members
  *  @return secure/reliable message(s)
  */
-func (msg *SecureMessage) Split(members []interface{}) []SecureMessage {
-	info := msg.CopyMap()
+func (msg *SecureMessage) Split(members []*ID) []SecureMessage {
+	info := msg.GetMap(true)
 	// check 'keys'
 	keys := msg.GetKeys()
 	if keys == nil {
-		keys = make(map[interface{}]string)
+		keys = make(map[string]string)
 	} else {
 		delete(info, "keys")
 	}
@@ -278,20 +280,20 @@ func (msg *SecureMessage) Split(members []interface{}) []SecureMessage {
 		// 2. change 'receiver' to each group member
 		info["receiver"] = member
 		// 3. get encrypted key
-		base64 := keys[member]
+		base64 := keys[member.String.String()]
 		if base64 == "" {
 			delete(info, "key")
 		} else {
 			info["key"] = base64
 		}
 		// 4. repack message
-		clone := types.CopyMap(info)
+		clone := CloneMap(info)
 		var sMsg *SecureMessage
 		if reliable {
-			rMsg := CreateReliableMessage(&clone)
+			rMsg := CreateReliableMessage(clone)
 			sMsg = (*SecureMessage)(unsafe.Pointer(rMsg))
 		} else {
-			sMsg = CreateSecureMessage(&clone)
+			sMsg = CreateSecureMessage(clone)
 		}
 		messages = append(messages, *sMsg)
 	}
@@ -304,13 +306,13 @@ func (msg *SecureMessage) Split(members []interface{}) []SecureMessage {
  * @param member - group member ID/string
  * @return SecureMessage
  */
-func (msg *SecureMessage) Trim(member interface{}) *SecureMessage {
-	info := msg.CopyMap()
+func (msg *SecureMessage) Trim(member *ID) *SecureMessage {
+	info := msg.GetMap(true)
 	// check 'keys'
 	keys := msg.GetKeys()
 	if keys != nil {
 		// move key data from 'keys' to key
-		base64 := keys[member]
+		base64 := keys[member.String.String()]
 		if base64 != "" {
 			info["key"] = base64
 		}
@@ -328,10 +330,10 @@ func (msg *SecureMessage) Trim(member interface{}) *SecureMessage {
 	// repack
 	var sMsg *SecureMessage
 	if _, reliable := info["signature"]; reliable {
-		rMsg := CreateReliableMessage(&info)
+		rMsg := CreateReliableMessage(info)
 		sMsg = (*SecureMessage)(unsafe.Pointer(rMsg))
 	} else {
-		sMsg = CreateSecureMessage(&info)
+		sMsg = CreateSecureMessage(info)
 	}
 	return sMsg
 }

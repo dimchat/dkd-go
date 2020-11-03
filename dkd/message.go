@@ -31,8 +31,9 @@
 package dkd
 
 import (
-	"dkd-go/protocol"
-	"dkd-go/types"
+	. "github.com/dimchat/dkd-go/protocol"
+	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/types"
 	"time"
 	"unsafe"
 )
@@ -74,39 +75,40 @@ import (
  *  }
  */
 type Message struct {
-	types.Dictionary
+	Dictionary
 
 	_env *Envelope
 }
 
-func CreateMessage(dictionary *map[string]interface{}) *Message {
-	if _, exists := (*dictionary)["content"]; exists {
+func CreateMessage(dictionary map[string]interface{}) *Message {
+	if _, exists := dictionary["content"]; exists {
 		// this should be an instant message
 		msg := CreateInstantMessage(dictionary)
 		return (*Message)(unsafe.Pointer(msg))
-	} else if _, exists := (*dictionary)["signature"]; exists {
+	} else if _, exists := dictionary["signature"]; exists {
 		// this should be a reliable message
 		msg := CreateReliableMessage(dictionary)
 		return (*Message)(unsafe.Pointer(msg))
-	} else if _, exists := (*dictionary)["data"]; exists {
+	} else if _, exists := dictionary["data"]; exists {
 		// this should be a secure message
 		msg := CreateSecureMessage(dictionary)
 		return (*Message)(unsafe.Pointer(msg))
 	}
-	return new(Message).LoadMessage(dictionary)
+	//panic("message error")
+	return new(Message).Init(dictionary)
 }
 
-func (msg *Message)LoadMessage(dictionary *map[string]interface{}) *Message {
-	if msg.LoadDictionary(dictionary) != nil {
+func (msg *Message)Init(dictionary map[string]interface{}) *Message {
+	if msg.Dictionary.Init(dictionary) != nil {
 		// lazy load
 		msg._env = nil
 	}
 	return msg
 }
 
-func (msg *Message) InitMessage(env *Envelope) *Message {
-	dict := env.GetMap()
-	if msg.LoadDictionary(&dict) != nil {
+func (msg *Message) InitWithEnvelope(env *Envelope) *Message {
+	dict := env.GetMap(false)
+	if msg.Dictionary.Init(dict) != nil {
 		msg._env = env
 	}
 	return msg
@@ -122,19 +124,17 @@ func (msg *Message) SetDelegate(delegate *MessageDelegate) {
 
 func (msg *Message) GetEnvelope() *Envelope {
 	if msg._env == nil {
-		dict := msg.GetMap()
-		env := new(Envelope)
-		env.LoadEnvelope(&dict)
-		msg._env = env
+		dict := msg.GetMap(false)
+		msg._env = new(Envelope).Init(dict)
 	}
 	return msg._env
 }
 
-func (msg *Message) GetSender() interface{} {
+func (msg *Message) GetSender() *ID {
 	return msg.GetEnvelope().GetSender()
 }
 
-func (msg *Message) GetReceiver() interface{} {
+func (msg *Message) GetReceiver() *ID {
 	return msg.GetEnvelope().GetReceiver()
 }
 
@@ -142,10 +142,10 @@ func (msg *Message) GetTime() time.Time {
 	return msg.GetEnvelope().GetTime()
 }
 
-func (msg *Message) GetGroup() interface{} {
+func (msg *Message) GetGroup() *ID {
 	return msg.GetEnvelope().GetGroup()
 }
 
-func (msg *Message) GetType() protocol.ContentType {
+func (msg *Message) GetType() ContentType {
 	return msg.GetEnvelope().GetType()
 }
