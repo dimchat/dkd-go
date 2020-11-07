@@ -32,7 +32,7 @@ package dkd
 
 import (
 	. "github.com/dimchat/dkd-go/protocol"
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 	"time"
 )
@@ -49,14 +49,14 @@ import (
  *      time     : 123
  *  }
  */
-type Envelope struct {
+type MessageEnvelope struct {
 	Dictionary
 
-	_delegate *MessageDelegate
+	_delegate MessageDelegate
 
-	_sender *ID
-	_receiver *ID
-	_group *ID
+	_sender ID
+	_receiver ID
+	_group ID
 
 	// message type: text, image, ...
 	_type ContentType
@@ -65,7 +65,7 @@ type Envelope struct {
 	_time time.Time
 }
 
-func (env *Envelope)Init(dictionary map[string]interface{}) *Envelope {
+func (env *MessageEnvelope) Init(dictionary map[string]interface{}) *MessageEnvelope {
 	if env.Dictionary.Init(dictionary) != nil {
 		// lazy load
 		env._sender = nil
@@ -77,7 +77,7 @@ func (env *Envelope)Init(dictionary map[string]interface{}) *Envelope {
 	return env
 }
 
-func (env *Envelope) InitWith(sender *ID, receiver *ID, when time.Time) *Envelope {
+func (env *MessageEnvelope) InitWithSender(sender ID, receiver ID, when time.Time) *MessageEnvelope {
 	if env.Dictionary.Init(nil) != nil {
 		// message time
 		if when.IsZero() {
@@ -90,40 +90,40 @@ func (env *Envelope) InitWith(sender *ID, receiver *ID, when time.Time) *Envelop
 		env._type = 0
 		env._time = when
 
-		env.Set("sender", sender.String.String())
-		env.Set("receiver", receiver.String.String())
+		env.Set("sender", sender.String())
+		env.Set("receiver", receiver.String())
 		env.Set("time", when.Unix())
 	}
 	return env
 }
 
-func (env *Envelope) GetDelegate() *MessageDelegate {
+func (env MessageEnvelope) Delegate() MessageDelegate {
 	return env._delegate
 }
 
-func (env *Envelope) SetDelegate(delegate *MessageDelegate) {
+func (env *MessageEnvelope) SetDelegate(delegate MessageDelegate) {
 	env._delegate = delegate
 }
 
-func (env *Envelope) GetSender() *ID {
+func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
 		sender := env.Get("sender")
-		handler := *env.GetDelegate()
+		handler := env.Delegate()
 		env._sender = handler.GetID(sender)
 	}
 	return env._sender
 }
 
-func (env *Envelope) GetReceiver() *ID {
+func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
 		receiver := env.Get("receiver")
-		handler := *env.GetDelegate()
+		handler := env.Delegate()
 		env._receiver = handler.GetID(receiver)
 	}
 	return env._receiver
 }
 
-func (env *Envelope) GetTime() time.Time {
+func (env *MessageEnvelope) Time() time.Time {
 	if env._time.IsZero() {
 		timestamp := env.Get("time")
 		env._time = time.Unix(timestamp.(int64), 0)
@@ -138,19 +138,19 @@ func (env *Envelope) GetTime() time.Time {
  *  the 'receiver' will be changed to a member ID, and
  *  the group ID will be saved as 'group'.
  */
-func (env *Envelope) GetGroup() *ID {
+func (env *MessageEnvelope) Group() ID {
 	if env._group == nil {
 		group := env.Get("group")
 		if group != nil {
-			handler := *env.GetDelegate()
+			handler := env.Delegate()
 			env._group = handler.GetID(group)
 		}
 	}
 	return env._group
 }
 
-func (env *Envelope) SetGroup(group *ID)  {
-	env.Set("group", group.String.String())
+func (env *MessageEnvelope) SetGroup(group ID)  {
+	env.Set("group", group.String())
 	env._group = group
 }
 
@@ -162,7 +162,7 @@ func (env *Envelope) SetGroup(group *ID)  {
  *  we pick out the content type and set it in envelope
  *  to let the station do its job.
  */
-func (env *Envelope) GetType() ContentType {
+func (env *MessageEnvelope) Type() ContentType {
 	if env._type == 0 {
 		t := env.Get("type")
 		if t != nil {
@@ -172,7 +172,7 @@ func (env *Envelope) GetType() ContentType {
 	return env._type
 }
 
-func (env *Envelope) SetType(t ContentType)  {
+func (env *MessageEnvelope) SetType(t ContentType)  {
 	env.Set("type", uint8(t))
 	env._type = t
 }

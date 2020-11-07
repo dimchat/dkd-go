@@ -32,10 +32,9 @@ package dkd
 
 import (
 	. "github.com/dimchat/dkd-go/protocol"
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 	"time"
-	"unsafe"
 )
 
 /*
@@ -74,31 +73,29 @@ import (
  *      ...
  *  }
  */
-type Message struct {
+type BaseMessage struct {
 	Dictionary
+	Message
 
-	_env *Envelope
+	_env Envelope
 }
 
-func CreateMessage(dictionary map[string]interface{}) *Message {
+func CreateMessage(dictionary map[string]interface{}) Message {
 	if _, exists := dictionary["content"]; exists {
 		// this should be an instant message
-		msg := CreateInstantMessage(dictionary)
-		return (*Message)(unsafe.Pointer(msg))
+		return CreateInstantMessage(dictionary)
 	} else if _, exists := dictionary["signature"]; exists {
 		// this should be a reliable message
-		msg := CreateReliableMessage(dictionary)
-		return (*Message)(unsafe.Pointer(msg))
+		return CreateReliableMessage(dictionary)
 	} else if _, exists := dictionary["data"]; exists {
 		// this should be a secure message
-		msg := CreateSecureMessage(dictionary)
-		return (*Message)(unsafe.Pointer(msg))
+		return CreateSecureMessage(dictionary)
 	}
 	//panic("message error")
-	return new(Message).Init(dictionary)
+	return new(BaseMessage).Init(dictionary)
 }
 
-func (msg *Message)Init(dictionary map[string]interface{}) *Message {
+func (msg *BaseMessage) Init(dictionary map[string]interface{}) *BaseMessage {
 	if msg.Dictionary.Init(dictionary) != nil {
 		// lazy load
 		msg._env = nil
@@ -106,46 +103,54 @@ func (msg *Message)Init(dictionary map[string]interface{}) *Message {
 	return msg
 }
 
-func (msg *Message) InitWithEnvelope(env *Envelope) *Message {
-	dict := env.GetMap(false)
+func (msg *BaseMessage) InitWithEnvelope(env Envelope) *BaseMessage {
+	dict := env.GetMap(true)
 	if msg.Dictionary.Init(dict) != nil {
 		msg._env = env
 	}
 	return msg
 }
 
-func (msg *Message) GetDelegate() *MessageDelegate {
-	return msg.GetEnvelope().GetDelegate()
+func (msg BaseMessage) Delegate() MessageDelegate {
+	env, ok := msg.Envelope().(*MessageEnvelope)
+	if ok {
+		return env.Delegate()
+	} else {
+		return nil
+	}
 }
 
-func (msg *Message) SetDelegate(delegate *MessageDelegate) {
-	msg.GetEnvelope().SetDelegate(delegate)
+func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
+	env, ok := msg.Envelope().(*MessageEnvelope)
+	if ok {
+		env.SetDelegate(delegate)
+	}
 }
 
-func (msg *Message) GetEnvelope() *Envelope {
+func (msg *BaseMessage) Envelope() Envelope {
 	if msg._env == nil {
 		dict := msg.GetMap(false)
-		msg._env = new(Envelope).Init(dict)
+		msg._env = new(MessageEnvelope).Init(dict)
 	}
 	return msg._env
 }
 
-func (msg *Message) GetSender() *ID {
-	return msg.GetEnvelope().GetSender()
+func (msg *BaseMessage) Sender() ID {
+	return msg.Envelope().Sender()
 }
 
-func (msg *Message) GetReceiver() *ID {
-	return msg.GetEnvelope().GetReceiver()
+func (msg *BaseMessage) Receiver() ID {
+	return msg.Envelope().Receiver()
 }
 
-func (msg *Message) GetTime() time.Time {
-	return msg.GetEnvelope().GetTime()
+func (msg *BaseMessage) Time() time.Time {
+	return msg.Envelope().Time()
 }
 
-func (msg *Message) GetGroup() *ID {
-	return msg.GetEnvelope().GetGroup()
+func (msg *BaseMessage) Group() ID {
+	return msg.Envelope().Group()
 }
 
-func (msg *Message) GetType() ContentType {
-	return msg.GetEnvelope().GetType()
+func (msg *BaseMessage) Type() ContentType {
+	return msg.Envelope().Type()
 }

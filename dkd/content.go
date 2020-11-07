@@ -32,7 +32,7 @@ package dkd
 
 import (
 	. "github.com/dimchat/dkd-go/protocol"
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 	"math/rand"
 	"time"
@@ -55,10 +55,11 @@ import (
  *      //...
  *  }
  */
-type Content struct {
+type BaseContent struct {
 	Dictionary
+	Content
 
-	_delegate *MessageDelegate
+	_delegate MessageDelegate
 
 	// message type: text, image, ...
 	_type ContentType
@@ -70,10 +71,10 @@ type Content struct {
 	_time time.Time
 
 	// extra info
-	_group *ID
+	_group ID
 }
 
-func (content *Content)Init(dictionary map[string]interface{}) *Content {
+func (content *BaseContent) Init(dictionary map[string]interface{}) *BaseContent {
 	if content.Dictionary.Init(dictionary) != nil {
 		// lazy load
 		content._type = 0
@@ -84,7 +85,7 @@ func (content *Content)Init(dictionary map[string]interface{}) *Content {
 	return content
 }
 
-func (content *Content) InitWithType(t ContentType) *Content {
+func (content *BaseContent) InitWithType(t ContentType) *BaseContent {
 	if content.Dictionary.Init(nil) != nil {
 		// message time
 		now := time.Now()
@@ -104,15 +105,15 @@ func (content *Content) InitWithType(t ContentType) *Content {
 	return content
 }
 
-func (content *Content) GetDelegate() *MessageDelegate {
+func (content BaseContent) Delegate() MessageDelegate {
 	return content._delegate
 }
 
-func (content *Content) SetDelegate(delegate *MessageDelegate) {
+func (content *BaseContent) SetDelegate(delegate MessageDelegate) {
 	content._delegate = delegate
 }
 
-func (content *Content) GetType() ContentType {
+func (content *BaseContent) Type() ContentType {
 	if content._type == 0 {
 		t := content.Get("type")
 		content._type = ContentType(t.(uint8))
@@ -120,7 +121,7 @@ func (content *Content) GetType() ContentType {
 	return content._type
 }
 
-func (content *Content) GetSerialNumber() uint32 {
+func (content *BaseContent) SerialNumber() uint32 {
 	if content._sn == 0 {
 		sn := content.Get("sn")
 		content._sn = sn.(uint32)
@@ -128,7 +129,7 @@ func (content *Content) GetSerialNumber() uint32 {
 	return content._sn
 }
 
-func (content *Content) GetTime() time.Time {
+func (content *BaseContent) Time() time.Time {
 	if content._time.IsZero() {
 		timestamp := content.Get("time")
 		if timestamp != nil {
@@ -140,18 +141,18 @@ func (content *Content) GetTime() time.Time {
 
 // Group ID/string for group message
 //    if field 'group' exists, it means this is a group message
-func (content *Content) GetGroup() *ID {
+func (content *BaseContent) Group() ID {
 	if content._group == nil {
 		group := content.Get("group")
 		if group != nil {
-			handler := *content.GetDelegate()
-			content._group = handler.GetID(group)
+			delegate := content.Delegate()
+			content._group = delegate.GetID(group)
 		}
 	}
 	return content._group
 }
 
-func (content *Content) SetGroup(group *ID)  {
-	content.Set("group", group.String.String())
+func (content *BaseContent) SetGroup(group ID)  {
+	content.Set("group", group.String())
 	content._group = group
 }

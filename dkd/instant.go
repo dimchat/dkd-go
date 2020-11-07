@@ -33,85 +33,65 @@ package dkd
 import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/crypto"
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/protocol"
 	"time"
 )
 
-/**
- *  Instant Message
- *  ~~~~~~~~~~~~~~~
- *
- *  data format: {
- *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
- *      //-- content
- *      content  : {...}
- *  }
- */
-type InstantMessage struct {
-	Message
+type PlainMessage struct {
+	BaseMessage
+	InstantMessage
 
-	_content *Content
+	_content Content
 }
 
-func CreateInstantMessage(dictionary map[string]interface{}) *InstantMessage {
-	return new(InstantMessage).Init(dictionary)
+func CreateInstantMessage(dictionary map[string]interface{}) InstantMessage {
+	return new(PlainMessage).Init(dictionary)
 }
 
-func (msg *InstantMessage)Init(dictionary map[string]interface{}) *InstantMessage {
-	if msg.Message.Init(dictionary) != nil {
+func (msg *PlainMessage) Init(dictionary map[string]interface{}) *PlainMessage {
+	if msg.BaseMessage.Init(dictionary) != nil {
 		// lazy load
 		msg._content = nil
 	}
 	return msg
 }
 
-func (msg *InstantMessage) InitWithEnvelope(env *Envelope, body *Content) *InstantMessage {
-	dict := env.GetMap(true)
-	dict["content"] = body.GetMap(false)
-	if msg.Message.Init(dict) != nil {
+func (msg *PlainMessage) InitWithEnvelope(env Envelope, body Content) *PlainMessage {
+	if msg.BaseMessage.InitWithEnvelope(env) != nil {
 		msg._content = body
+		msg.Set("content", body.GetMap(false))
 	}
 	return msg
 }
 
-func (msg *InstantMessage) GetDelegate() *InstantMessageDelegate {
-	delegate := msg.GetEnvelope().GetDelegate()
-	handler := (*delegate).(InstantMessageDelegate)
-	return &handler
+func (msg PlainMessage) Delegate() InstantMessageDelegate {
+	delegate := msg.BaseMessage.Delegate()
+	return delegate.(InstantMessageDelegate)
 }
 
-func (msg *InstantMessage) SetDelegate(delegate *InstantMessageDelegate) {
-	handler := (*delegate).(MessageDelegate)
-	msg.GetContent().SetDelegate(&handler)
-	msg.GetEnvelope().SetDelegate(&handler)
-}
-
-func (msg *InstantMessage) GetContent() *Content {
+func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {
 		body := msg.Get("content")
-		handler := msg.GetDelegate()
-		msg._content = (*handler).GetContent(body)
+		handler := msg.Delegate()
+		msg._content = handler.GetContent(body)
 	}
 	return msg._content
 }
 
-func (msg *InstantMessage) GetTime() time.Time {
-	t := msg.GetContent().GetTime()
+func (msg *PlainMessage) Time() time.Time {
+	t := msg.Content().Time()
 	if t.IsZero() {
-		t = msg.GetEnvelope().GetTime()
+		t = msg.Envelope().Time()
 	}
 	return t
 }
 
-func (msg *InstantMessage) GetGroup() *ID {
-	return msg.GetContent().GetGroup()
+func (msg *PlainMessage) Group() ID {
+	return msg.Content().Group()
 }
 
-func (msg *InstantMessage) GetType() ContentType {
-	return msg.GetContent().GetType()
+func (msg *PlainMessage) Type() ContentType {
+	return msg.Content().Type()
 }
 
 /*
@@ -133,24 +113,24 @@ func (msg *InstantMessage) GetType() ContentType {
  * @param password - symmetric key
  * @return SecureMessage object
  */
-func (msg *InstantMessage) Encrypt(password *SymmetricKey, members []*ID) *SecureMessage {
+func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMessage {
 	// 0. check attachment for File/Image/Audio/Video message content
 	//    (do it in 'core' module)
 
-	handler := msg.GetDelegate()
-	content := msg.GetContent()
+	delegate := msg.Delegate()
+	content := msg.Content()
 
 	// 1. encrypt 'message.content' to 'message.data'
-	data := (*handler).SerializeContent(content, password, msg)
-	data = (*handler).EncryptContent(data, password, msg)
-	base64 := (*handler).EncodeData(data, msg)
+	data := delegate.SerializeContent(content, password, msg)
+	data = delegate.EncryptContent(data, password, msg)
+	base64 := delegate.EncodeData(data, msg)
 	info := msg.GetMap(true)
 	delete(info, "content")
 	info["data"] = base64
 
 	// 2. encrypt symmetric key(password) to 'message.key' or 'message.keys'
 	// 2.1. serialize symmetric key
-	key := (*handler).SerializeKey(password, msg)
+	key := delegate.SerializeKey(password, msg)
 	if key == nil {
 		// A) broadcast message has no key
 		// B) reused key
@@ -159,14 +139,14 @@ func (msg *InstantMessage) Encrypt(password *SymmetricKey, members []*ID) *Secur
 	// 2.2. encrypt symmetric key(s)
 	if members == nil {
 		// personal message
-		key = (*handler).EncryptKey(key, msg.GetReceiver(), msg)
+		key = delegate.EncryptKey(key, msg.Receiver(), msg)
 		if key == nil {
 			// public key for encryption not found
 			// TODO: suspend this message for waiting receiver's meta
 			return nil
 		}
 		// 2.3. encode encrypted key data
-		base64 = (*handler).EncodeKey(key, msg)
+		base64 = delegate.EncodeKey(key, msg)
 		// 2.4. insert as 'key'
 		info["key"] = base64
 	} else {
@@ -174,16 +154,16 @@ func (msg *InstantMessage) Encrypt(password *SymmetricKey, members []*ID) *Secur
 		keys := make(map[string]string)
 		count := 0
 		for _, member := range members {
-			data = (*handler).EncryptKey(key, member, msg)
+			data = delegate.EncryptKey(key, member, msg)
 			if data == nil {
 				// public key for encryption not found
 				// TODO: suspend this message for waiting receiver's meta
 				continue
 			}
 			// 2.3. encode encrypted key data
-			base64 = (*handler).EncodeKey(data, msg)
+			base64 = delegate.EncodeKey(data, msg)
 			// 2.4. insert to 'message.keys' with member ID
-			keys[member.String.String()] = base64
+			keys[member.String()] = base64
 			count++
 		}
 		if count > 0 {

@@ -31,8 +31,9 @@
 package dkd
 
 import (
+	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/crypto"
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/mkm-go/protocol"
 )
 
 type MessageDelegate interface {
@@ -43,7 +44,7 @@ type MessageDelegate interface {
 	 * @param identifier - String object
 	 * @return ID object
 	 */
-	GetID(identifier interface{}) *ID
+	GetID(identifier interface{}) ID
 }
 
 type InstantMessageDelegate interface {
@@ -55,7 +56,7 @@ type InstantMessageDelegate interface {
 	 * @param content - message content info
 	 * @return Content object
 	 */
-	GetContent(dictionary interface{}) *Content
+	GetContent(dictionary interface{}) Content
 
 	//
 	//  Encrypt Content
@@ -69,7 +70,7 @@ type InstantMessageDelegate interface {
 	 * @param password - symmetric key
 	 * @return serialized content data
 	 */
-	SerializeContent(content *Content, password *SymmetricKey, iMsg *InstantMessage) []byte
+	SerializeContent(content Content, password SymmetricKey, iMsg InstantMessage) []byte
 
 	/**
 	 *  2. Encrypt content data to 'message.data' with symmetric key
@@ -79,7 +80,7 @@ type InstantMessageDelegate interface {
 	 * @param password - symmetric key
 	 * @return encrypted message content data
 	 */
-	EncryptContent(data []byte, password *SymmetricKey, iMsg *InstantMessage) []byte
+	EncryptContent(data []byte, password SymmetricKey, iMsg InstantMessage) []byte
 
 	/**
 	 *  3. Encode 'message.data' to String (Base64)
@@ -88,7 +89,7 @@ type InstantMessageDelegate interface {
 	 * @param data - encrypted content data
 	 * @return String object
 	 */
-	EncodeData(data []byte, iMsg *InstantMessage) string
+	EncodeData(data []byte, iMsg InstantMessage) string
 
 	//
 	//  Encrypt Key
@@ -101,7 +102,7 @@ type InstantMessageDelegate interface {
 	 * @param password - symmetric key
 	 * @return serialized key data
 	 */
-	SerializeKey(password *SymmetricKey, iMsg *InstantMessage) []byte
+	SerializeKey(password SymmetricKey, iMsg InstantMessage) []byte
 
 	/**
 	 *  5. Encrypt key data to 'message.key' with receiver's public key
@@ -111,7 +112,7 @@ type InstantMessageDelegate interface {
 	 * @param receiver - receiver ID string
 	 * @return encrypted symmetric key data
 	 */
-	EncryptKey(data []byte, receiver *ID, iMsg *InstantMessage) []byte
+	EncryptKey(data []byte, receiver ID, iMsg InstantMessage) []byte
 
 	/**
 	 *  6. Encode 'message.key' to String (Base64)
@@ -120,7 +121,7 @@ type InstantMessageDelegate interface {
 	 * @param data - encrypted symmetric key data
 	 * @return String object
 	 */
-	EncodeKey(data []byte, iMsg *InstantMessage) string
+	EncodeKey(data []byte, iMsg InstantMessage) string
 }
 
 type SecureMessageDelegate interface {
@@ -137,7 +138,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return encrypted symmetric key data
 	 */
-	DecodeKey(key string, sMsg *SecureMessage) []byte
+	DecodeKey(key string, sMsg SecureMessage) []byte
 
 	/**
 	 *  2. Decrypt 'message.key' with receiver's private key
@@ -148,7 +149,7 @@ type SecureMessageDelegate interface {
 	 *  @param sMsg - secure message object
 	 *  @return serialized symmetric key
 	 */
-	DecryptKey(key []byte, sender *ID, receiver *ID, sMsg *SecureMessage) []byte
+	DecryptKey(key []byte, sender ID, receiver ID, sMsg SecureMessage) []byte
 
 	/**
 	 *  3. Deserialize message key from data (JsON / ProtoBuf / ...)
@@ -159,7 +160,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return symmetric key
 	 */
-	DeserializeKey(key []byte, sender *ID, receiver *ID, sMsg *SecureMessage) *SymmetricKey
+	DeserializeKey(key []byte, sender ID, receiver ID, sMsg SecureMessage) SymmetricKey
 
 	//
 	//  Decrypt Content
@@ -172,7 +173,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return encrypted content data
 	 */
-	DecodeData(data string, sMsg *SecureMessage) []byte
+	DecodeData(data string, sMsg SecureMessage) []byte
 
 	/**
 	 *  5. Decrypt 'message.data' with symmetric key
@@ -182,7 +183,7 @@ type SecureMessageDelegate interface {
 	 *  @param sMsg - secure message object
 	 *  @return serialized message content
 	 */
-	DecryptContent(data []byte, password *SymmetricKey, sMsg *SecureMessage) []byte
+	DecryptContent(data []byte, password SymmetricKey, sMsg SecureMessage) []byte
 
 	/**
 	 *  6. Deserialize message content from data (JsON / ProtoBuf / ...)
@@ -192,7 +193,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return message content
 	 */
-	DeserializeContent(data []byte, password *SymmetricKey, sMsg *SecureMessage) *Content
+	DeserializeContent(data []byte, password SymmetricKey, sMsg SecureMessage) Content
 
 	//
 	//  Signature
@@ -206,7 +207,7 @@ type SecureMessageDelegate interface {
 	 *  @param sMsg - secure message object
 	 *  @return signature of encrypted message data
 	 */
-	SignData(data []byte, sender *ID, sMsg *SecureMessage) []byte
+	SignData(data []byte, sender ID, sMsg SecureMessage) []byte
 
 	/**
 	 *  2. Encode 'message.signature' to String (Base64)
@@ -215,7 +216,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return String object
 	 */
-	EncodeSignature(signature []byte, sMsg *SecureMessage) string
+	EncodeSignature(signature []byte, sMsg SecureMessage) string
 }
 
 type ReliableMessageDelegate interface {
@@ -228,7 +229,7 @@ type ReliableMessageDelegate interface {
 	 * @param rMsg - reliable message
 	 * @return signature data
 	 */
-	DecodeSignature(signature string, rMsg *ReliableMessage) []byte
+	DecodeSignature(signature string, rMsg ReliableMessage) []byte
 
 	/**
 	 *  2. Verify the message data and signature with sender's public key
@@ -239,5 +240,5 @@ type ReliableMessageDelegate interface {
 	 *  @param rMsg - reliable message object
 	 *  @return YES on signature matched
 	 */
-	VerifyDataSignature(data []byte, signature []byte, sender *ID, rMsg *ReliableMessage) bool
+	VerifyDataSignature(data []byte, signature []byte, sender ID, rMsg ReliableMessage) bool
 }

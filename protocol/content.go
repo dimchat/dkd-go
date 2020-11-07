@@ -30,6 +30,12 @@
  */
 package protocol
 
+import (
+	. "github.com/dimchat/mkm-go/protocol"
+	. "github.com/dimchat/mkm-go/types"
+	"time"
+)
+
 /*
  *  @enum DKDContentType
  *
@@ -106,3 +112,35 @@ const (
 	// top-secret message forward by proxy (Service Provider)
 	FORWARD       ContentType = 0xFF // 1111 1111
 )
+
+/**
+ *  Message Content
+ *  ~~~~~~~~~~~~~~~
+ *  This class is for creating message content
+ *
+ *  data format: {
+ *      'type'    : 0x00,            // message type
+ *      'sn'      : 0,               // serial number
+ *
+ *      'group'   : 'Group ID',      // for group message
+ *
+ *      //-- message info
+ *      'text'    : 'text',          // for text message
+ *      'command' : 'Command Name',  // for system command
+ *      //...
+ *  }
+ */
+type Content interface {
+	Map
+
+	Type() ContentType
+	SerialNumber() uint32
+
+	Time() time.Time
+
+	Group() ID
+}
+
+func ContentsEqual(content1, content2 Content) bool {
+	return MapsEqual(content1, content2)
+}

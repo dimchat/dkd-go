@@ -31,7 +31,7 @@
 package dkd
 
 import (
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/dkd-go/protocol"
 )
 
 /**
@@ -55,100 +55,37 @@ import (
  *      signature: "..."   // base64_encode()
  *  }
  */
-type ReliableMessage struct {
-	SecureMessage
+type RelayMessage struct {
+	EncryptedMessage
+	ReliableMessage
 
 	_signature []byte
 }
 
-func CreateReliableMessage(dictionary map[string]interface{}) *ReliableMessage {
-	return new(ReliableMessage).Init(dictionary)
+func CreateReliableMessage(dictionary map[string]interface{}) ReliableMessage {
+	return new(RelayMessage).Init(dictionary)
 }
 
-func (msg *ReliableMessage)Init(dictionary map[string]interface{}) *ReliableMessage {
-	if msg.SecureMessage.Init(dictionary) != nil {
+func (msg *RelayMessage) Init(dictionary map[string]interface{}) *RelayMessage {
+	if msg.EncryptedMessage.Init(dictionary) != nil {
 		// lazy load
 		msg._signature = nil
 	}
 	return msg
 }
 
-func (msg *ReliableMessage) GetDelegate() *ReliableMessageDelegate {
-	delegate := msg.GetEnvelope().GetDelegate()
-	handler := (*delegate).(ReliableMessageDelegate)
-	return &handler
+func (msg RelayMessage) Delegate() ReliableMessageDelegate {
+	delegate := msg.BaseMessage.Delegate()
+	return delegate.(ReliableMessageDelegate)
 }
 
-func (msg *ReliableMessage) SetDelegate(delegate *ReliableMessageDelegate) {
-	handler := (*delegate).(MessageDelegate)
-	msg.GetEnvelope().SetDelegate(&handler)
-}
-
-func (msg *ReliableMessage) GetSignature() []byte {
+func (msg *RelayMessage) Signature() []byte {
 	if msg._signature == nil {
 		base64 := msg.Get("signature")
-		handler := msg.GetDelegate()
-		msg._signature = (*handler).DecodeSignature(base64.(string), msg)
+		delegate := msg.Delegate()
+		msg._signature = delegate.DecodeSignature(base64.(string), msg)
 	}
 	return msg._signature
-}
-
-/**
- *  Sender's Meta
- *  ~~~~~~~~~~~~~
- *  Extends for the first message package of 'Handshake' protocol.
- *
- * @param meta - Meta object or dictionary
- */
-func (msg *ReliableMessage) GetMeta() map[string]interface{} {
-	value := msg.Get("meta")
-	if value == nil {
-		return nil
-	}
-	return value.(map[string]interface{})
-}
-
-func (msg *ReliableMessage) SetMeta(meta interface{}) {
-	ptr, ok := meta.(*Meta)
-	if !ok {
-		obj, ok := meta.(Meta)
-		if !ok {
-			// map[string]interface{}
-			msg.Set("meta", meta)
-			return
-		}
-		ptr = &obj
-	}
-	msg.Set("meta", (*ptr).GetMap(false))
-}
-
-/**
- *  Sender's Profile
- *  ~~~~~~~~~~~~~~~~
- *  Extends for the first message package of 'Handshake' protocol.
- *
- * @param profile - Profile object or dictionary
- */
-func (msg *ReliableMessage) GetProfile() map[string]interface{} {
-	value := msg.Get("profile")
-	if value == nil {
-		return nil
-	}
-	return value.(map[string]interface{})
-}
-
-func (msg *ReliableMessage) SetProfile(profile interface{}) {
-	ptr, ok := profile.(*Profile)
-	if !ok {
-		obj, ok := profile.(Profile)
-		if !ok {
-			// map[string]interfaces{}
-			msg.Set("profile", profile)
-			return
-		}
-		ptr = &obj
-	}
-	msg.Set("profile", (*ptr).GetMap(false))
 }
 
 /*
@@ -170,19 +107,19 @@ func (msg *ReliableMessage) SetProfile(profile interface{}) {
  *
  * @return SecureMessage object
  */
-func (msg *ReliableMessage) Verify() *SecureMessage {
-	data := msg.GetData()
+func (msg *RelayMessage) Verify() SecureMessage {
+	data := msg.EncryptedData()
 	if data == nil {
 		panic("failed to decode content data")
 	}
-	signature := msg.GetSignature()
+	signature := msg.Signature()
 	if signature == nil {
 		panic("failed to decode message signature")
 	}
-	sender := msg.GetSender()
+	sender := msg.Sender()
 	// 1. verify data signature with sender's public key
-	handler := msg.GetDelegate()
-	if (*handler).VerifyDataSignature(data, signature, sender, msg) {
+	delegate := msg.Delegate()
+	if delegate.VerifyDataSignature(data, signature, sender, msg) {
 		// 2. pack message
 		info := msg.GetMap(true)
 		delete(info, "signature")

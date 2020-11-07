@@ -31,9 +31,9 @@
 package dkd
 
 import (
-	. "github.com/dimchat/mkm-go/mkm"
+	. "github.com/dimchat/dkd-go/protocol"
+	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"unsafe"
 )
 
 /**
@@ -54,25 +54,25 @@ import (
  *      }
  *  }
  */
-type SecureMessage struct {
-	Message
+type EncryptedMessage struct {
+	BaseMessage
+	SecureMessage
 
 	_data []byte
 	_key []byte
 	_keys map[string]string
 }
 
-func CreateSecureMessage(dictionary map[string]interface{}) *SecureMessage {
+func CreateSecureMessage(dictionary map[string]interface{}) SecureMessage {
 	if _, exists := dictionary["signature"]; exists {
 		// this should be a reliable message
-		msg := new(ReliableMessage).Init(dictionary)
-		return (*SecureMessage)(unsafe.Pointer(msg))
+		return new(RelayMessage).Init(dictionary)
 	}
-	return new(SecureMessage).Init(dictionary)
+	return new(EncryptedMessage).Init(dictionary)
 }
 
-func (msg *SecureMessage)Init(dictionary map[string]interface{}) *SecureMessage {
-	if msg.Message.Init(dictionary) != nil {
+func (msg *EncryptedMessage) Init(dictionary map[string]interface{}) *EncryptedMessage {
+	if msg.BaseMessage.Init(dictionary) != nil {
 		// lazy load
 		msg._data = nil
 		msg._key = nil
@@ -81,46 +81,40 @@ func (msg *SecureMessage)Init(dictionary map[string]interface{}) *SecureMessage 
 	return msg
 }
 
-func (msg *SecureMessage) GetDelegate() *SecureMessageDelegate {
-	delegate := msg.GetEnvelope().GetDelegate()
-	handler := (*delegate).(SecureMessageDelegate)
-	return &handler
+func (msg EncryptedMessage) Delegate() SecureMessageDelegate {
+	delegate := msg.BaseMessage.Delegate()
+	return delegate.(SecureMessageDelegate)
 }
 
-func (msg *SecureMessage) SetDelegate(delegate *SecureMessageDelegate) {
-	handler := (*delegate).(MessageDelegate)
-	msg.GetEnvelope().SetDelegate(&handler)
-}
-
-func (msg *SecureMessage) GetData() []byte {
+func (msg *EncryptedMessage) EncryptedData() []byte {
 	if msg._data == nil {
 		base64 := msg.Get("data")
-		handler := msg.GetDelegate()
-		msg._data = (*handler).DecodeData(base64.(string), msg)
+		handler := msg.Delegate()
+		msg._data = handler.DecodeData(base64.(string), msg)
 	}
 	return msg._data
 }
 
-func (msg *SecureMessage) GetKey() []byte {
+func (msg *EncryptedMessage) EncryptedKey() []byte {
 	if msg._key == nil {
 		base64 := msg.Get("key")
 		if base64 == nil {
 			// check 'keys'
-			keys := msg.GetKeys()
+			keys := msg.EncryptedKeys()
 			if keys != nil {
-				receiver := msg.GetReceiver()
-				base64 = keys[receiver.String.String()]
+				receiver := msg.Receiver()
+				base64 = keys[receiver.String()]
 			}
 		}
 		if base64 != nil {
-			handler := msg.GetDelegate()
-			msg._key = (*handler).DecodeKey(base64.(string), msg)
+			handler := msg.Delegate()
+			msg._key = handler.DecodeKey(base64.(string), msg)
 		}
 	}
 	return msg._key
 }
 
-func (msg *SecureMessage) GetKeys() map[string]string {
+func (msg *EncryptedMessage) EncryptedKeys() map[string]string {
 	if msg._keys == nil {
 		keys := msg.Get("keys")
 		if keys != nil {
@@ -148,50 +142,50 @@ func (msg *SecureMessage) GetKeys() map[string]string {
  *
  * @return InstantMessage object
  */
-func (msg *SecureMessage) Decrypt() *InstantMessage {
-	var sender = msg.GetSender()
-	var receiver *ID
-	var group = msg.GetGroup()
+func (msg *EncryptedMessage) Decrypt() InstantMessage {
+	var sender = msg.Sender()
+	var receiver ID
+	var group = msg.Group()
 	if group == nil {
 		// personal message
 		// not split group message
-		receiver = msg.GetReceiver()
+		receiver = msg.Receiver()
 	} else {
 		// group message
 		receiver = group
 	}
 
 	// 1. decrypt 'message.key' to symmetric key
-	handler := msg.GetDelegate()
+	delegate := msg.Delegate()
 	// 1.1. decode encrypted key data
-	key := msg.GetKey()
+	key := msg.EncryptedKey()
 	// 1.2. decrypt key data
 	if key != nil {
-		key = (*handler).DecryptKey(key, sender, receiver, msg)
+		key = delegate.DecryptKey(key, sender, receiver, msg)
 		if key == nil {
 			panic("failed to decrypt key in msg")
 		}
 	}
 	// 1.3. deserialize key
 	//      if key is empty, means it should be reused, get it from key cache
-	password := (*handler).DeserializeKey(key, sender, receiver, msg)
+	password := delegate.DeserializeKey(key, sender, receiver, msg)
 	if password == nil {
 		panic("failed to get msg key")
 	}
 
 	// 2. decrypt 'message.data' to 'message.content'
 	// 2.1. decode encrypted content data
-	data := msg.GetData()
+	data := msg.EncryptedData()
 	if data == nil {
 		panic("failed to decode content data")
 	}
 	// 2.2. decrypt content data
-	data = (*handler).DecryptContent(data, password, msg)
+	data = delegate.DecryptContent(data, password, msg)
 	if data == nil {
 		panic("failed to decrypt data with key")
 	}
 	// 2.3. deserialize content
-	content := (*handler).DeserializeContent(data, password, msg)
+	content := delegate.DeserializeContent(data, password, msg)
 	if content == nil {
 		panic("failed to deserialize content")
 	}
@@ -230,14 +224,14 @@ func (msg *SecureMessage) Decrypt() *InstantMessage {
  *
  * @return ReliableMessage object
  */
-func (msg *SecureMessage) Sign() *ReliableMessage {
-	handler := msg.GetDelegate()
-	sender := msg.GetSender()
-	data := msg.GetData()
+func (msg *EncryptedMessage) Sign() ReliableMessage {
+	delegate := msg.Delegate()
+	sender := msg.Sender()
+	data := msg.EncryptedData()
 	// 1. sign with sender's private key
-	signature := (*handler).SignData(data, sender, msg)
+	signature := delegate.SignData(data, sender, msg)
 	// 2. encode signature
-	base64 := (*handler).EncodeSignature(signature, msg)
+	base64 := delegate.EncodeSignature(signature, msg)
 	// 3. pack message
 	info := msg.GetMap(true)
 	info["signature"] = base64
@@ -256,10 +250,10 @@ func (msg *SecureMessage) Sign() *ReliableMessage {
  *  @param members - group members
  *  @return secure/reliable message(s)
  */
-func (msg *SecureMessage) Split(members []*ID) []SecureMessage {
+func (msg *EncryptedMessage) Split(members []ID) []SecureMessage {
 	info := msg.GetMap(true)
 	// check 'keys'
-	keys := msg.GetKeys()
+	keys := msg.EncryptedKeys()
 	if keys == nil {
 		keys = make(map[string]string)
 	} else {
@@ -273,14 +267,14 @@ func (msg *SecureMessage) Split(members []*ID) []SecureMessage {
 	//    when the group message separated to multi-messages;
 	//    if don't want the others know your membership,
 	//    DON'T do this.
-	info["group"] = msg.GetReceiver()
+	info["group"] = msg.Receiver()
 
 	messages := make([]SecureMessage, 0, len(members))
 	for _, member := range members {
 		// 2. change 'receiver' to each group member
 		info["receiver"] = member
 		// 3. get encrypted key
-		base64 := keys[member.String.String()]
+		base64 := keys[member.String()]
 		if base64 == "" {
 			delete(info, "key")
 		} else {
@@ -288,14 +282,13 @@ func (msg *SecureMessage) Split(members []*ID) []SecureMessage {
 		}
 		// 4. repack message
 		clone := CloneMap(info)
-		var sMsg *SecureMessage
+		var sMsg SecureMessage
 		if reliable {
-			rMsg := CreateReliableMessage(clone)
-			sMsg = (*SecureMessage)(unsafe.Pointer(rMsg))
+			sMsg = CreateReliableMessage(clone)
 		} else {
 			sMsg = CreateSecureMessage(clone)
 		}
-		messages = append(messages, *sMsg)
+		messages = append(messages, sMsg)
 	}
 	return messages
 }
@@ -306,34 +299,31 @@ func (msg *SecureMessage) Split(members []*ID) []SecureMessage {
  * @param member - group member ID/string
  * @return SecureMessage
  */
-func (msg *SecureMessage) Trim(member *ID) *SecureMessage {
+func (msg *EncryptedMessage) Trim(member ID) SecureMessage {
 	info := msg.GetMap(true)
 	// check 'keys'
-	keys := msg.GetKeys()
+	keys := msg.EncryptedKeys()
 	if keys != nil {
 		// move key data from 'keys' to key
-		base64 := keys[member.String.String()]
+		base64 := keys[member.String()]
 		if base64 != "" {
 			info["key"] = base64
 		}
 		delete(info, "keys")
 	}
 	// check 'group'
-	group := msg.GetGroup()
+	group := msg.Group()
 	if group == nil {
 		// if 'group' not exists, the 'receiver' must be a group ID here, and
 		// it will not be equal to the member of course,
 		// so move 'receiver' to 'group'
-		info["group"] = msg.GetReceiver()
+		info["group"] = msg.Receiver()
 	}
 	info["receiver"] = member
 	// repack
-	var sMsg *SecureMessage
 	if _, reliable := info["signature"]; reliable {
-		rMsg := CreateReliableMessage(info)
-		sMsg = (*SecureMessage)(unsafe.Pointer(rMsg))
+		return CreateReliableMessage(info)
 	} else {
-		sMsg = CreateSecureMessage(info)
+		return CreateSecureMessage(info)
 	}
-	return sMsg
 }
