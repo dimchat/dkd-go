@@ -58,8 +58,9 @@ import (
 type BaseContent struct {
 	Dictionary
 	Content
+	IdentifierDelegateHolder
 
-	_delegate MessageDelegate
+	_delegate IdentifierDelegate
 
 	// message type: text, image, ...
 	_type ContentType
@@ -105,11 +106,11 @@ func (content *BaseContent) InitWithType(t ContentType) *BaseContent {
 	return content
 }
 
-func (content BaseContent) Delegate() MessageDelegate {
+func (content BaseContent) Delegate() IdentifierDelegate {
 	return content._delegate
 }
 
-func (content *BaseContent) SetDelegate(delegate MessageDelegate) {
+func (content *BaseContent) SetDelegate(delegate IdentifierDelegate) {
 	content._delegate = delegate
 }
 

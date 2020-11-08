@@ -76,23 +76,11 @@ import (
 type BaseMessage struct {
 	Dictionary
 	Message
+	MessageDelegateHolder
+
+	_delegate MessageDelegate
 
 	_env Envelope
-}
-
-func CreateMessage(dictionary map[string]interface{}) Message {
-	if _, exists := dictionary["content"]; exists {
-		// this should be an instant message
-		return CreateInstantMessage(dictionary)
-	} else if _, exists := dictionary["signature"]; exists {
-		// this should be a reliable message
-		return CreateReliableMessage(dictionary)
-	} else if _, exists := dictionary["data"]; exists {
-		// this should be a secure message
-		return CreateSecureMessage(dictionary)
-	}
-	//panic("message error")
-	return new(BaseMessage).Init(dictionary)
 }
 
 func (msg *BaseMessage) Init(dictionary map[string]interface{}) *BaseMessage {
@@ -112,12 +100,7 @@ func (msg *BaseMessage) InitWithEnvelope(env Envelope) *BaseMessage {
 }
 
 func (msg BaseMessage) Delegate() MessageDelegate {
-	env, ok := msg.Envelope().(*MessageEnvelope)
-	if ok {
-		return env.Delegate()
-	} else {
-		return nil
-	}
+	return msg._delegate
 }
 
 func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
@@ -125,6 +108,7 @@ func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
 	if ok {
 		env.SetDelegate(delegate)
 	}
+	msg._delegate = delegate
 }
 
 func (msg *BaseMessage) Envelope() Envelope {

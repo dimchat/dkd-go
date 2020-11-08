@@ -36,7 +36,7 @@ import (
 	. "github.com/dimchat/mkm-go/protocol"
 )
 
-type MessageDelegate interface {
+type IdentifierDelegate interface {
 
 	/**
 	 *  Convert String object to ID object
@@ -47,8 +47,23 @@ type MessageDelegate interface {
 	GetID(identifier interface{}) ID
 }
 
+type IdentifierDelegateHolder interface {
+	Delegate() IdentifierDelegate
+	SetDelegate(delegate IdentifierDelegate)
+}
+
+type MessageDelegateHolder interface {
+	Delegate() MessageDelegate
+	SetDelegate(delegate MessageDelegate)
+}
+
+type MessageDelegate interface {
+	IdentifierDelegate
+	InstantMessageDelegate
+	ReliableMessageDelegate
+}
+
 type InstantMessageDelegate interface {
-	MessageDelegate
 
 	/**
 	 *  Convert Map object to Content object
@@ -125,7 +140,6 @@ type InstantMessageDelegate interface {
 }
 
 type SecureMessageDelegate interface {
-	MessageDelegate
 
 	//
 	//  Decrypt Key

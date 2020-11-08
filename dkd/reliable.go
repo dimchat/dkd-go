@@ -74,11 +74,6 @@ func (msg *RelayMessage) Init(dictionary map[string]interface{}) *RelayMessage {
 	return msg
 }
 
-func (msg RelayMessage) Delegate() ReliableMessageDelegate {
-	delegate := msg.BaseMessage.Delegate()
-	return delegate.(ReliableMessageDelegate)
-}
-
 func (msg *RelayMessage) Signature() []byte {
 	if msg._signature == nil {
 		base64 := msg.Get("signature")

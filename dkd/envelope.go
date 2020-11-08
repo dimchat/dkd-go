@@ -51,8 +51,9 @@ import (
  */
 type MessageEnvelope struct {
 	Dictionary
+	IdentifierDelegateHolder
 
-	_delegate MessageDelegate
+	_delegate IdentifierDelegate
 
 	_sender ID
 	_receiver ID
@@ -97,19 +98,19 @@ func (env *MessageEnvelope) InitWithSender(sender ID, receiver ID, when time.Tim
 	return env
 }
 
-func (env MessageEnvelope) Delegate() MessageDelegate {
+func (env MessageEnvelope) Delegate() IdentifierDelegate {
 	return env._delegate
 }
 
-func (env *MessageEnvelope) SetDelegate(delegate MessageDelegate) {
+func (env *MessageEnvelope) SetDelegate(delegate IdentifierDelegate) {
 	env._delegate = delegate
 }
 
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
 		sender := env.Get("sender")
-		handler := env.Delegate()
-		env._sender = handler.GetID(sender)
+		delegate := env.Delegate()
+		env._sender = delegate.GetID(sender)
 	}
 	return env._sender
 }
@@ -117,8 +118,8 @@ func (env *MessageEnvelope) Sender() ID {
 func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
 		receiver := env.Get("receiver")
-		handler := env.Delegate()
-		env._receiver = handler.GetID(receiver)
+		delegate := env.Delegate()
+		env._receiver = delegate.GetID(receiver)
 	}
 	return env._receiver
 }
@@ -142,8 +143,8 @@ func (env *MessageEnvelope) Group() ID {
 	if env._group == nil {
 		group := env.Get("group")
 		if group != nil {
-			handler := env.Delegate()
-			env._group = handler.GetID(group)
+			delegate := env.Delegate()
+			env._group = delegate.GetID(group)
 		}
 	}
 	return env._group

@@ -81,16 +81,11 @@ func (msg *EncryptedMessage) Init(dictionary map[string]interface{}) *EncryptedM
 	return msg
 }
 
-func (msg EncryptedMessage) Delegate() SecureMessageDelegate {
-	delegate := msg.BaseMessage.Delegate()
-	return delegate.(SecureMessageDelegate)
-}
-
 func (msg *EncryptedMessage) EncryptedData() []byte {
 	if msg._data == nil {
 		base64 := msg.Get("data")
-		handler := msg.Delegate()
-		msg._data = handler.DecodeData(base64.(string), msg)
+		delegate := msg.Delegate()
+		msg._data = delegate.DecodeData(base64.(string), msg)
 	}
 	return msg._data
 }
@@ -107,8 +102,8 @@ func (msg *EncryptedMessage) EncryptedKey() []byte {
 			}
 		}
 		if base64 != nil {
-			handler := msg.Delegate()
-			msg._key = handler.DecodeKey(base64.(string), msg)
+			delegate := msg.Delegate()
+			msg._key = delegate.DecodeKey(base64.(string), msg)
 		}
 	}
 	return msg._key

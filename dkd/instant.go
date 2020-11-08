@@ -64,16 +64,19 @@ func (msg *PlainMessage) InitWithEnvelope(env Envelope, body Content) *PlainMess
 	return msg
 }
 
-func (msg PlainMessage) Delegate() InstantMessageDelegate {
-	delegate := msg.BaseMessage.Delegate()
-	return delegate.(InstantMessageDelegate)
+func (msg *PlainMessage) SetDelegate(delegate MessageDelegate) {
+	content, ok := msg.Content().(*BaseContent)
+	if ok {
+		content.SetDelegate(delegate)
+	}
+	msg.BaseMessage.SetDelegate(delegate)
 }
 
 func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {
 		body := msg.Get("content")
-		handler := msg.Delegate()
-		msg._content = handler.GetContent(body)
+		delegate := msg.Delegate()
+		msg._content = delegate.GetContent(body)
 	}
 	return msg._content
 }

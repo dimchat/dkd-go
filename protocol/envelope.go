@@ -74,6 +74,7 @@ type Envelope interface {
 	 *  the group ID will be saved as 'group'.
 	 */
 	Group() ID
+	SetGroup(group ID)
 
 	/*
 	 *  Message Type
@@ -84,4 +85,5 @@ type Envelope interface {
 	 *  to let the station do its job.
 	 */
 	Type() ContentType
+	SetType(t ContentType)
 }
