@@ -76,25 +76,26 @@ import (
 type BaseMessage struct {
 	Dictionary
 	Message
-	MessageDelegateHolder
-
-	_delegate MessageDelegate
 
 	_env Envelope
+
+	_delegate MessageDelegate
 }
 
-func (msg *BaseMessage) Init(dictionary map[string]interface{}) *BaseMessage {
-	if msg.Dictionary.Init(dictionary) != nil {
+func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
+	if msg.Dictionary.Init(dict) != nil {
 		// lazy load
 		msg._env = nil
+		msg._delegate = nil
 	}
 	return msg
 }
 
 func (msg *BaseMessage) InitWithEnvelope(env Envelope) *BaseMessage {
-	dict := env.GetMap(true)
+	dict := env.GetMap(false)
 	if msg.Dictionary.Init(dict) != nil {
 		msg._env = env
+		msg._delegate = nil
 	}
 	return msg
 }
@@ -104,10 +105,6 @@ func (msg BaseMessage) Delegate() MessageDelegate {
 }
 
 func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
-	env, ok := msg.Envelope().(*MessageEnvelope)
-	if ok {
-		env.SetDelegate(delegate)
-	}
 	msg._delegate = delegate
 }
 
@@ -135,6 +132,17 @@ func (msg *BaseMessage) Group() ID {
 	return msg.Envelope().Group()
 }
 
-func (msg *BaseMessage) Type() ContentType {
+func (msg *BaseMessage) Type() uint8 {
 	return msg.Envelope().Type()
+}
+
+/**
+ *  General Factories
+ *  ~~~~~~~~~~~~~~~~~
+ */
+func BuildMessageFactories() {
+	BuildEnvelopeFactory()
+	BuildInstantMessageFactory()
+	BuildSecureMessageFactory()
+	BuildReliableMessageFactory()
 }

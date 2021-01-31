@@ -37,6 +37,19 @@ import (
 	"time"
 )
 
+/**
+ *  Instant Message
+ *  ~~~~~~~~~~~~~~~
+ *
+ *  data format: {
+ *      //-- envelope
+ *      sender   : "moki@xxx",
+ *      receiver : "hulk@yyy",
+ *      time     : 123,
+ *      //-- content
+ *      content  : {...}
+ *  }
+ */
 type PlainMessage struct {
 	BaseMessage
 	InstantMessage
@@ -44,12 +57,8 @@ type PlainMessage struct {
 	_content Content
 }
 
-func CreateInstantMessage(dictionary map[string]interface{}) InstantMessage {
-	return new(PlainMessage).Init(dictionary)
-}
-
-func (msg *PlainMessage) Init(dictionary map[string]interface{}) *PlainMessage {
-	if msg.BaseMessage.Init(dictionary) != nil {
+func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
+	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
 		msg._content = nil
 	}
@@ -64,36 +73,26 @@ func (msg *PlainMessage) InitWithEnvelope(env Envelope, body Content) *PlainMess
 	return msg
 }
 
-func (msg *PlainMessage) SetDelegate(delegate MessageDelegate) {
-	content, ok := msg.Content().(*BaseContent)
-	if ok {
-		content.SetDelegate(delegate)
-	}
-	msg.BaseMessage.SetDelegate(delegate)
-}
-
 func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {
-		body := msg.Get("content")
-		delegate := msg.Delegate()
-		msg._content = delegate.GetContent(body)
+		msg._content = InstantMessageGetContent(msg.GetMap(false))
 	}
 	return msg._content
 }
 
 func (msg *PlainMessage) Time() time.Time {
-	t := msg.Content().Time()
-	if t.IsZero() {
-		t = msg.Envelope().Time()
+	msgTime := msg.Content().Time()
+	if msgTime.IsZero() {
+		msgTime = msg.Envelope().Time()
 	}
-	return t
+	return msgTime
 }
 
 func (msg *PlainMessage) Group() ID {
 	return msg.Content().Group()
 }
 
-func (msg *PlainMessage) Type() ContentType {
+func (msg *PlainMessage) Type() uint8 {
 	return msg.Content().Type()
 }
 
@@ -137,7 +136,7 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
 	if key == nil {
 		// A) broadcast message has no key
 		// B) reused key
-		return CreateSecureMessage(info)
+		return SecureMessageParse(info)
 	}
 	// 2.2. encrypt symmetric key(s)
 	if members == nil {
@@ -154,7 +153,7 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
 		info["key"] = base64
 	} else {
 		// group message
-		keys := make(map[string]string)
+		keys := make(map[string]string, len(members))
 		count := 0
 		for _, member := range members {
 			data = delegate.EncryptKey(key, member, msg)
@@ -175,5 +174,30 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
 	}
 
 	// 3. pack message
-	return CreateSecureMessage(info)
+	return SecureMessageParse(info)
+}
+
+/**
+ *  General Factory
+ *  ~~~~~~~~~~~~~~~
+ */
+type PlainMessageFactory struct {
+	InstantMessageFactory
+}
+
+func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
+	return new(PlainMessage).InitWithEnvelope(head, body)
+}
+
+func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {
+	return new(PlainMessage).Init(msg)
+}
+
+func BuildInstantMessageFactory() InstantMessageFactory {
+	factory := InstantMessageGetFactory()
+	if factory == nil {
+		factory = new(PlainMessageFactory)
+		InstantMessageSetFactory(factory)
+	}
+	return factory
 }

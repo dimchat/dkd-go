@@ -63,16 +63,8 @@ type EncryptedMessage struct {
 	_keys map[string]string
 }
 
-func CreateSecureMessage(dictionary map[string]interface{}) SecureMessage {
-	if _, exists := dictionary["signature"]; exists {
-		// this should be a reliable message
-		return new(RelayMessage).Init(dictionary)
-	}
-	return new(EncryptedMessage).Init(dictionary)
-}
-
-func (msg *EncryptedMessage) Init(dictionary map[string]interface{}) *EncryptedMessage {
-	if msg.BaseMessage.Init(dictionary) != nil {
+func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage {
+	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
 		msg._data = nil
 		msg._key = nil
@@ -197,7 +189,7 @@ func (msg *EncryptedMessage) Decrypt() InstantMessage {
 	delete(info, "keys")
 	delete(info, "data")
 	info["content"] = content.GetMap(false)
-	return CreateInstantMessage(info)
+	return InstantMessageParse(info)
 }
 
 /*
@@ -230,7 +222,7 @@ func (msg *EncryptedMessage) Sign() ReliableMessage {
 	// 3. pack message
 	info := msg.GetMap(true)
 	info["signature"] = base64
-	return CreateReliableMessage(info)
+	return ReliableMessageParse(info)
 }
 
 /*
@@ -254,8 +246,6 @@ func (msg *EncryptedMessage) Split(members []ID) []SecureMessage {
 	} else {
 		delete(info, "keys")
 	}
-	// check 'signature'
-	_, reliable := info["signature"]
 
 	// 1. move the receiver(group ID) to 'group'
 	//    this will help the receiver knows the group ID
@@ -276,14 +266,10 @@ func (msg *EncryptedMessage) Split(members []ID) []SecureMessage {
 			info["key"] = base64
 		}
 		// 4. repack message
-		clone := CloneMap(info)
-		var sMsg SecureMessage
-		if reliable {
-			sMsg = CreateReliableMessage(clone)
-		} else {
-			sMsg = CreateSecureMessage(clone)
+		sMsg := SecureMessageParse(CloneMap(info))
+		if sMsg != nil {
+			messages = append(messages, sMsg)
 		}
-		messages = append(messages, sMsg)
 	}
 	return messages
 }
@@ -316,9 +302,30 @@ func (msg *EncryptedMessage) Trim(member ID) SecureMessage {
 	}
 	info["receiver"] = member
 	// repack
-	if _, reliable := info["signature"]; reliable {
-		return CreateReliableMessage(info)
-	} else {
-		return CreateSecureMessage(info)
+	return SecureMessageParse(info)
+}
+
+/**
+ *  General Factory
+ *  ~~~~~~~~~~~~~~~
+ */
+type EncryptedMessageFactory struct {
+	SecureMessageFactory
+}
+
+func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
+	if _, exists := msg["signature"]; exists {
+		// this should be a reliable message
+		return new(RelayMessage).Init(msg)
 	}
+	return new(EncryptedMessage).Init(msg)
+}
+
+func BuildSecureMessageFactory() SecureMessageFactory {
+	factory := SecureMessageGetFactory()
+	if factory == nil {
+		factory = new(EncryptedMessageFactory)
+		SecureMessageSetFactory(factory)
+	}
+	return factory
 }

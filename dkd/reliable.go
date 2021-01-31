@@ -32,6 +32,7 @@ package dkd
 
 import (
 	. "github.com/dimchat/dkd-go/protocol"
+	. "github.com/dimchat/mkm-go/protocol"
 )
 
 /**
@@ -60,16 +61,17 @@ type RelayMessage struct {
 	ReliableMessage
 
 	_signature []byte
+
+	_meta Meta
+	_visa Visa
 }
 
-func CreateReliableMessage(dictionary map[string]interface{}) ReliableMessage {
-	return new(RelayMessage).Init(dictionary)
-}
-
-func (msg *RelayMessage) Init(dictionary map[string]interface{}) *RelayMessage {
-	if msg.EncryptedMessage.Init(dictionary) != nil {
+func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
+	if msg.EncryptedMessage.Init(dict) != nil {
 		// lazy load
 		msg._signature = nil
+		msg._meta = nil
+		msg._visa = nil
 	}
 	return msg
 }
@@ -81,6 +83,30 @@ func (msg *RelayMessage) Signature() []byte {
 		msg._signature = delegate.DecodeSignature(base64.(string), msg)
 	}
 	return msg._signature
+}
+
+func (msg *RelayMessage) Meta() Meta {
+	if msg._meta == nil {
+		msg._meta = ReliableMessageGetMeta(msg.GetMap(false))
+	}
+	return msg._meta
+}
+
+func (msg *RelayMessage) SetMeta(meta Meta) {
+	ReliableMessageSetMeta(msg.GetMap(false), meta)
+	msg._meta = meta
+}
+
+func (msg *RelayMessage) Visa() Visa {
+	if msg._visa == nil {
+		msg._visa = ReliableMessageGetVisa(msg.GetMap(false))
+	}
+	return msg._visa
+}
+
+func (msg *RelayMessage) SetVisa(visa Visa) {
+	ReliableMessageSetVisa(msg.GetMap(false), visa)
+	msg._visa = visa
 }
 
 /*
@@ -118,9 +144,30 @@ func (msg *RelayMessage) Verify() SecureMessage {
 		// 2. pack message
 		info := msg.GetMap(true)
 		delete(info, "signature")
-		return CreateSecureMessage(info)
+		return SecureMessageParse(info)
 	} else {
 		//panic("message signature not match")
 		return nil
 	}
+}
+
+/**
+ *  General Factory
+ *  ~~~~~~~~~~~~~~~
+ */
+type RelayMessageFactory struct {
+	ReliableMessageFactory
+}
+
+func (factory *RelayMessageFactory) ParseSecureMessage(msg map[string]interface{}) ReliableMessage {
+	return new(RelayMessage).Init(msg)
+}
+
+func BuildReliableMessageFactory() ReliableMessageFactory {
+	factory := ReliableMessageGetFactory()
+	if factory == nil {
+		factory = new(RelayMessageFactory)
+		ReliableMessageSetFactory(factory)
+	}
+	return factory
 }

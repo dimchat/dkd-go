@@ -31,14 +31,52 @@
 package protocol
 
 import (
-	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 	"time"
 )
 
+/*
+ *  Message Transforming
+ *  ~~~~~~~~~~~~~~~~~~~~
+ *
+ *     Instant Message <-> Secure Message <-> Reliable Message
+ *     +-------------+     +------------+     +--------------+
+ *     |  sender     |     |  sender    |     |  sender      |
+ *     |  receiver   |     |  receiver  |     |  receiver    |
+ *     |  time       |     |  time      |     |  time        |
+ *     |             |     |            |     |              |
+ *     |  content    |     |  data      |     |  data        |
+ *     +-------------+     |  key/keys  |     |  key/keys    |
+ *                         +------------+     |  signature   |
+ *                                            +--------------+
+ *     Algorithm:
+ *         data      = password.encrypt(content)
+ *         key       = receiver.public_key.encrypt(password)
+ *         signature = sender.private_key.sign(data)
+ */
+
+/**
+ *  Message with Envelope
+ *  ~~~~~~~~~~~~~~~~~~~~~
+ *  Base classes for messages
+ *  This class is used to create a message
+ *  with the envelope fields, such as 'sender', 'receiver', and 'time'
+ *
+ *  data format: {
+ *      //-- envelope
+ *      sender   : "moki@xxx",
+ *      receiver : "hulk@yyy",
+ *      time     : 123,
+ *      //-- body
+ *      ...
+ *  }
+ */
 type Message interface {
 	Map
+
+	GetDelegate() MessageDelegate
+	SetDelegate(delegate MessageDelegate)
 
 	Envelope() Envelope
 
@@ -47,122 +85,9 @@ type Message interface {
 	Time() time.Time
 
 	Group() ID
-	Type() ContentType
+	Type() uint8
 }
 
-/**
- *  Instant Message
- *  ~~~~~~~~~~~~~~~
- *
- *  data format: {
- *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
- *      //-- content
- *      content  : {...}
- *  }
- */
-type InstantMessage interface {
-	Message
-
-	Content() Content
-
-	/**
-	 *  Encrypt message, replace 'content' field with encrypted 'data'
-	 *
-	 * @param password - symmetric key
-	 * @return SecureMessage object
-	 */
-	Encrypt(password SymmetricKey, members []ID) SecureMessage
-}
-
-/**
- *  Secure Message
- *  ~~~~~~~~~~~~~~
- *  Instant Message encrypted by a symmetric key
- *
- *  data format: {
- *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
- *      //-- content data and key/keys
- *      data     : "...",  // base64_encode(symmetric)
- *      key      : "...",  // base64_encode(asymmetric)
- *      keys     : {
- *          "ID1": "key1", // base64_encode(asymmetric)
- *      }
- *  }
- */
-type SecureMessage interface {
-	Message
-
-	EncryptedData() []byte
-	EncryptedKey() []byte
-	EncryptedKeys() map[string]string
-
-	/**
-	 *  Decrypt message, replace encrypted 'data' with 'content' field
-	 *
-	 * @return InstantMessage object
-	 */
-	Decrypt() InstantMessage
-
-	/**
-	 *  Sign message.data, add 'signature' field
-	 *
-	 * @return ReliableMessage object
-	 */
-	Sign() ReliableMessage
-
-	/**
-	 *  Split the group message to single person messages
-	 *
-	 *  @param members - group members
-	 *  @return secure/reliable message(s)
-	 */
-	Split(members []ID) []SecureMessage
-
-	/**
-	 *  Trim the group message for a member
-	 *
-	 * @param member - group member ID/string
-	 * @return SecureMessage
-	 */
-	Trim(member ID) SecureMessage
-}
-
-/**
- *  Reliable Message signed by an asymmetric key
- *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *  This class is used to sign the SecureMessage
- *  It contains a 'signature' field which signed with sender's private key
- *
- *  data format: {
- *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
- *      //-- content data and key/keys
- *      data     : "...",  // base64_encode(symmetric)
- *      key      : "...",  // base64_encode(asymmetric)
- *      keys     : {
- *          "ID1": "key1", // base64_encode(asymmetric)
- *      },
- *      //-- signature
- *      signature: "..."   // base64_encode()
- *  }
- */
-type ReliableMessage interface {
-	SecureMessage
-
-	Signature() []byte
-
-	/**
-	 *  Verify 'data' and 'signature' field with sender's public key
-	 *
-	 * @return SecureMessage object
-	 */
-	Verify() SecureMessage
+func MessageGetEnvelope(msg map[string]interface{}) Envelope {
+	return EnvelopeParse(msg)
 }

@@ -28,50 +28,27 @@
  * SOFTWARE.
  * ==============================================================================
  */
-package dkd
+package protocol
 
 import (
-	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
 )
 
-type IdentifierDelegate interface {
-
-	/**
-	 *  Convert String object to ID object
-	 *
-	 * @param identifier - String object
-	 * @return ID object
-	 */
-	GetID(identifier interface{}) ID
-}
-
-type IdentifierDelegateHolder interface {
-	Delegate() IdentifierDelegate
-	SetDelegate(delegate IdentifierDelegate)
-}
-
-type MessageDelegateHolder interface {
-	Delegate() MessageDelegate
-	SetDelegate(delegate MessageDelegate)
-}
-
+/**
+ *  Message Delegate
+ *  ~~~~~~~~~~~~~~~~
+ */
 type MessageDelegate interface {
-	IdentifierDelegate
 	InstantMessageDelegate
 	ReliableMessageDelegate
 }
 
+/**
+ *  Instant Message Delegate
+ *  ~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 type InstantMessageDelegate interface {
-
-	/**
-	 *  Convert Map object to Content object
-	 *
-	 * @param content - message content info
-	 * @return Content object
-	 */
-	GetContent(dictionary interface{}) Content
 
 	//
 	//  Encrypt Content
@@ -139,6 +116,10 @@ type InstantMessageDelegate interface {
 	EncodeKey(data []byte, iMsg InstantMessage) string
 }
 
+/**
+ *  Secure Message Delegate
+ *  ~~~~~~~~~~~~~~~~~~~~~~~
+ */
 type SecureMessageDelegate interface {
 
 	//
@@ -233,6 +214,10 @@ type SecureMessageDelegate interface {
 	EncodeSignature(signature []byte, sMsg SecureMessage) string
 }
 
+/**
+ *  Reliable Message Delegate
+ *  ~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 type ReliableMessageDelegate interface {
 	SecureMessageDelegate
 

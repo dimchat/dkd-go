@@ -86,31 +86,31 @@ import (
 type ContentType uint8
 
 const (
-	UNKNOWN       ContentType = 0x00
-	TEXT          ContentType = 0x01 // 0000 0001
+	UNKNOWN       = 0x00
+	TEXT          = 0x01 // 0000 0001
 
-	FILE          ContentType = 0x10 // 0001 0000
-	IMAGE         ContentType = 0x12 // 0001 0010
-	AUDIO         ContentType = 0x14 // 0001 0100
-	VIDEO         ContentType = 0x16 // 0001 0110
+	FILE          = 0x10 // 0001 0000
+	IMAGE         = 0x12 // 0001 0010
+	AUDIO         = 0x14 // 0001 0100
+	VIDEO         = 0x16 // 0001 0110
 
 	// web page
-	PAGE          ContentType = 0x20 // 0010 0000
+	PAGE          = 0x20 // 0010 0000
 
 	// quote a message before and reply it with text
-	QUOTE         ContentType = 0x37 // 0011 0111
+	QUOTE         = 0x37 // 0011 0111
 
-	MONEY         ContentType = 0x40 // 0100 0000
-	TRANSFER      ContentType = 0x41 // 0100 0001
-	LUCKY_MONEY   ContentType = 0x42 // 0100 0010
-	CLAIM_PAYMENT ContentType = 0x48 // 0100 1000 (Claim for payment)
-	SPLIT_BILL    ContentType = 0x49 // 0100 1001 (Split the bill)
+	MONEY         = 0x40 // 0100 0000
+	TRANSFER      = 0x41 // 0100 0001
+	LUCKY_MONEY   = 0x42 // 0100 0010
+	CLAIM_PAYMENT = 0x48 // 0100 1000 (Claim for payment)
+	SPLIT_BILL    = 0x49 // 0100 1001 (Split the bill)
 
-	COMMAND       ContentType = 0x88 // 1000 1000
-	HISTORY       ContentType = 0x89 // 1000 1001 (Entity history command)
+	COMMAND       = 0x88 // 1000 1000
+	HISTORY       = 0x89 // 1000 1001 (Entity history command)
 
 	// top-secret message forward by proxy (Service Provider)
-	FORWARD       ContentType = 0xFF // 1111 1111
+	FORWARD       = 0xFF // 1111 1111
 )
 
 /**
@@ -133,14 +133,95 @@ const (
 type Content interface {
 	Map
 
-	Type() ContentType
-	SerialNumber() uint32
+	Type() uint8      // message type
+	SN() uint32       // serial number as message id
 
-	Time() time.Time
+	Time() time.Time  // message time
 
+	// Group ID/string for group message
+	//    if field 'group' exists, it means this is a group message
 	Group() ID
+	SetGroup(group ID)
 }
 
-func ContentsEqual(content1, content2 Content) bool {
-	return MapsEqual(content1, content2)
+func ContentGetType(content map[string]interface{}) uint8 {
+	msgType := content["type"]
+	return msgType.(uint8)
+}
+
+func ContentGetSN(content map[string]interface{}) uint32 {
+	sn := content["sn"]
+	return sn.(uint32)
+}
+
+func ContentGetTime(content map[string]interface{}) time.Time {
+	timestamp := content["time"]
+	if timestamp == nil {
+		return time.Time{}
+	}
+	return time.Unix(timestamp.(int64), 0)
+}
+
+func ContentGetGroup(content map[string]interface{}) ID {
+	return IDParse(content["group"])
+}
+
+func ContentSetGroup(content map[string]interface{}, group ID) {
+	if group == nil {
+		delete(content, "group")
+	} else {
+		content["group"] = group.String()
+	}
+}
+
+/**
+ *  Content Factory
+ *  ~~~~~~~~~~~~~~~
+ */
+type ContentFactory interface {
+
+	/**
+	 *  Parse map object to content
+	 *
+	 * @param content - content info
+	 * @return Content
+	 */
+	ParseContent(content map[string]interface{}) Content
+}
+
+var contentFactories = make(map[uint8]ContentFactory)
+
+func ContentRegister(msgType uint8, factory ContentFactory) {
+	contentFactories[msgType] = factory
+}
+
+func ContentGetFactory(msgType uint8) ContentFactory {
+	return contentFactories[msgType]
+}
+
+//
+//  Factory method
+//
+func ContentParse(content interface{}) Content {
+	if content == nil {
+		return nil
+	}
+	var info map[string]interface{}
+	value := ObjectValue(content)
+	switch value.(type) {
+	case Content:
+		return value.(Content)
+	case Map:
+		info = value.(Map).GetMap(false)
+	case map[string]interface{}:
+		info = value.(map[string]interface{})
+	default:
+		panic(content)
+	}
+	msgType := ContentGetType(info)
+	factory := ContentGetFactory(msgType)
+	if factory == nil {
+		factory = ContentGetFactory(0)  // unknown
+	}
+	return factory.ParseContent(info)
 }

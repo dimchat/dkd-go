@@ -84,6 +84,113 @@ type Envelope interface {
 	 *  we pick out the content type and set it in envelope
 	 *  to let the station do its job.
 	 */
-	Type() ContentType
-	SetType(t ContentType)
+	Type() uint8
+	SetType(msgType uint8)
+}
+
+func EnvelopeGetSender(env map[string]interface{}) ID {
+	return IDParse(env["sender"])
+}
+
+func EnvelopeGetReceiver(env map[string]interface{}) ID {
+	return IDParse(env["receiver"])
+}
+
+func EnvelopeGetTime(env map[string]interface{}) time.Time {
+	timestamp := env["time"]
+	if timestamp == nil {
+		return time.Time{}
+	}
+	return time.Unix(timestamp.(int64), 0)
+}
+
+func EnvelopeGetGroup(env map[string]interface{}) ID {
+	return IDParse(env["group"])
+}
+
+func EnvelopeSetGroup(env map[string]interface{}, group ID) {
+	if group == nil {
+		delete(env, "group")
+	} else {
+		env["group"] = group.String()
+	}
+}
+
+func EnvelopeGetType(env map[string]interface{}) uint8 {
+	msgType := env["type"]
+	if msgType == nil {
+		return 0
+	}
+	return msgType.(uint8)
+}
+
+func EnvelopeSetType(env map[string]interface{}, msgType uint8) {
+	if msgType == 0 {
+		delete(env, "type")
+	} else {
+		env["type"] = msgType
+	}
+}
+
+/**
+ *  Envelope Factory
+ *  ~~~~~~~~~~~~~~~~
+ */
+type EnvelopeFactory interface {
+
+	/**
+	 *  Create envelope
+	 *
+	 * @param from - sender ID
+	 * @param to   - receiver ID
+	 * @param when - message time
+	 * @return Envelope
+	 */
+	CreateEnvelope(from ID, to ID, when time.Time) Envelope
+
+	/**
+	 *  Parse map object to envelope
+	 *
+	 * @param env - envelope info
+	 * @return Envelope
+	 */
+	ParseEnvelope(env map[string]interface{}) Envelope
+}
+
+var envelopeFactory EnvelopeFactory = nil
+
+func EnvelopeSetFactory(factory EnvelopeFactory) {
+	envelopeFactory = factory
+}
+
+func EnvelopeGetFactory() EnvelopeFactory {
+	return envelopeFactory
+}
+
+//
+//  Factory methods
+//
+func EnvelopeCreate(from ID, to ID, when time.Time) Envelope {
+	factory := EnvelopeGetFactory()
+	return factory.CreateEnvelope(from, to, when)
+}
+
+func EnvelopeParse(env interface{}) Envelope {
+	if env == nil {
+		return nil
+	}
+	var info map[string]interface{}
+	value := ObjectValue(env)
+	switch value.(type) {
+	case Envelope:
+		return value.(Envelope)
+	case Map:
+		info = value.(Map).GetMap(false)
+	case map[string]interface{}:
+		info = value.(map[string]interface{})
+	default:
+		panic(env)
+	}
+	factory := EnvelopeGetFactory()
+	return factory.ParseEnvelope(info)
 }

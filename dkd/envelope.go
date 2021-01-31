@@ -51,28 +51,18 @@ import (
  */
 type MessageEnvelope struct {
 	Dictionary
-	IdentifierDelegateHolder
-
-	_delegate IdentifierDelegate
+	Envelope
 
 	_sender ID
 	_receiver ID
-	_group ID
-
-	// message type: text, image, ...
-	_type ContentType
-
-	// message time
 	_time time.Time
 }
 
-func (env *MessageEnvelope) Init(dictionary map[string]interface{}) *MessageEnvelope {
-	if env.Dictionary.Init(dictionary) != nil {
+func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
+	if env.Dictionary.Init(dict) != nil {
 		// lazy load
 		env._sender = nil
 		env._receiver = nil
-		env._group = nil
-		env._type = 0
 		env._time = time.Unix(0, 0)
 	}
 	return env
@@ -80,15 +70,9 @@ func (env *MessageEnvelope) Init(dictionary map[string]interface{}) *MessageEnve
 
 func (env *MessageEnvelope) InitWithSender(sender ID, receiver ID, when time.Time) *MessageEnvelope {
 	if env.Dictionary.Init(nil) != nil {
-		// message time
-		if when.IsZero() {
-			when = time.Now()
-		}
 		// initialize
 		env._sender = sender
 		env._receiver = receiver
-		env._group = nil
-		env._type = 0
 		env._time = when
 
 		env.Set("sender", sender.String())
@@ -98,36 +82,23 @@ func (env *MessageEnvelope) InitWithSender(sender ID, receiver ID, when time.Tim
 	return env
 }
 
-func (env MessageEnvelope) Delegate() IdentifierDelegate {
-	return env._delegate
-}
-
-func (env *MessageEnvelope) SetDelegate(delegate IdentifierDelegate) {
-	env._delegate = delegate
-}
-
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
-		sender := env.Get("sender")
-		delegate := env.Delegate()
-		env._sender = delegate.GetID(sender)
+		env._sender = EnvelopeGetSender(env.GetMap(false))
 	}
 	return env._sender
 }
 
 func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
-		receiver := env.Get("receiver")
-		delegate := env.Delegate()
-		env._receiver = delegate.GetID(receiver)
+		env._receiver = EnvelopeGetReceiver(env.GetMap(false))
 	}
 	return env._receiver
 }
 
 func (env *MessageEnvelope) Time() time.Time {
 	if env._time.IsZero() {
-		timestamp := env.Get("time")
-		env._time = time.Unix(timestamp.(int64), 0)
+		env._time = EnvelopeGetTime(env.GetMap(false))
 	}
 	return env._time
 }
@@ -140,19 +111,11 @@ func (env *MessageEnvelope) Time() time.Time {
  *  the group ID will be saved as 'group'.
  */
 func (env *MessageEnvelope) Group() ID {
-	if env._group == nil {
-		group := env.Get("group")
-		if group != nil {
-			delegate := env.Delegate()
-			env._group = delegate.GetID(group)
-		}
-	}
-	return env._group
+	return EnvelopeGetGroup(env.GetMap(false))
 }
 
 func (env *MessageEnvelope) SetGroup(group ID)  {
-	env.Set("group", group.String())
-	env._group = group
+	EnvelopeSetGroup(env.GetMap(false), group)
 }
 
 /*
@@ -163,17 +126,38 @@ func (env *MessageEnvelope) SetGroup(group ID)  {
  *  we pick out the content type and set it in envelope
  *  to let the station do its job.
  */
-func (env *MessageEnvelope) Type() ContentType {
-	if env._type == 0 {
-		t := env.Get("type")
-		if t != nil {
-			env._type = ContentType(t.(uint8))
-		}
-	}
-	return env._type
+func (env *MessageEnvelope) Type() uint8 {
+	return EnvelopeGetType(env.GetMap(false))
 }
 
-func (env *MessageEnvelope) SetType(t ContentType)  {
-	env.Set("type", uint8(t))
-	env._type = t
+func (env *MessageEnvelope) SetType(msgType uint8)  {
+	EnvelopeSetType(env.GetMap(false), msgType)
+}
+
+/**
+ *  General Factory
+ *  ~~~~~~~~~~~~~~~
+ */
+type MessageEnvelopeFactory struct {
+	EnvelopeFactory
+}
+
+func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
+	if when.IsZero() {
+		when = time.Now()
+	}
+	return new(MessageEnvelope).InitWithSender(from, to, when)
+}
+
+func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
+	return new(MessageEnvelope).Init(env)
+}
+
+func BuildEnvelopeFactory() EnvelopeFactory {
+	factory := EnvelopeGetFactory()
+	if factory == nil {
+		factory = new(MessageEnvelopeFactory)
+		EnvelopeSetFactory(factory)
+	}
+	return factory
 }
