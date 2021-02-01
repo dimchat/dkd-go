@@ -110,8 +110,7 @@ func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
 
 func (msg *BaseMessage) Envelope() Envelope {
 	if msg._env == nil {
-		dict := msg.GetMap(false)
-		msg._env = new(MessageEnvelope).Init(dict)
+		msg._env = MessageGetEnvelope(msg.GetMap(false))
 	}
 	return msg._env
 }

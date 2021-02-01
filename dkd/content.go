@@ -66,27 +66,33 @@ type BaseContent struct {
 	_group ID
 }
 
-func (content *BaseContent) Init(dict map[string]interface{}, msgType uint8) *BaseContent {
+func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 	if content.Dictionary.Init(dict) != nil {
-		if msgType > 0 {
-			// message time
-			now := time.Now()
-			stamp := now.Unix()
-			// serial number
-			rand.Seed(stamp)
-			sn := rand.Uint32()
-			content._type = msgType
-			content._sn = sn
-			content._time = now
-			content.Set("type", msgType)
-			content.Set("sn", sn)
-			content.Set("time", stamp)
-		} else {
-			// lazy load
-			content._type = 0
-			content._sn = 0
-			content._time = time.Time{}
-		}
+		// lazy load
+		content._type = 0
+		content._sn = 0
+		content._time = time.Time{}
+		content._group = nil
+	}
+	return content
+}
+
+func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
+	// message time
+	now := time.Now()
+	stamp := now.Unix()
+	// serial number
+	rand.Seed(stamp)
+	sn := rand.Uint32()
+	// build content info
+	dict := make(map[string]interface{})
+	dict["type"] = msgType
+	dict["sn"] = sn
+	dict["time"] = stamp
+	if content.Dictionary.Init(dict) != nil {
+		content._type = msgType
+		content._sn = sn
+		content._time = now
 		content._group = nil
 	}
 	return content

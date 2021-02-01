@@ -57,6 +57,10 @@ type PlainMessage struct {
 	_content Content
 }
 
+func NewPlainMessage(head Envelope, body Content) *PlainMessage {
+	return new(PlainMessage).InitWithEnvelope(head, body)
+}
+
 func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
 	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
@@ -186,7 +190,7 @@ type PlainMessageFactory struct {
 }
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
-	return new(PlainMessage).InitWithEnvelope(head, body)
+	return NewPlainMessage(head, body)
 }
 
 func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {

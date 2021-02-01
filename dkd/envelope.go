@@ -58,26 +58,29 @@ type MessageEnvelope struct {
 	_time time.Time
 }
 
+func NewMessageEnvelope(from ID, to ID, when time.Time) *MessageEnvelope {
+	if when.IsZero() {
+		when = time.Now()
+	}
+	dict := make(map[string]interface{})
+	dict["sender"] = from.String()
+	dict["receiver"] = to.String()
+	dict["time"] = when.Unix()
+	env := new(MessageEnvelope).Init(dict)
+	if env != nil {
+		env._sender = from
+		env._receiver = to
+		env._time = when
+	}
+	return env
+}
+
 func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
 	if env.Dictionary.Init(dict) != nil {
 		// lazy load
 		env._sender = nil
 		env._receiver = nil
 		env._time = time.Unix(0, 0)
-	}
-	return env
-}
-
-func (env *MessageEnvelope) InitWithSender(sender ID, receiver ID, when time.Time) *MessageEnvelope {
-	if env.Dictionary.Init(nil) != nil {
-		// initialize
-		env._sender = sender
-		env._receiver = receiver
-		env._time = when
-
-		env.Set("sender", sender.String())
-		env.Set("receiver", receiver.String())
-		env.Set("time", when.Unix())
 	}
 	return env
 }
@@ -143,10 +146,7 @@ type MessageEnvelopeFactory struct {
 }
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
-	if when.IsZero() {
-		when = time.Now()
-	}
-	return new(MessageEnvelope).InitWithSender(from, to, when)
+	return NewMessageEnvelope(from, to, when)
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
