@@ -66,6 +66,10 @@ type BaseContent struct {
 	_group ID
 }
 
+func NewContent(dict map[string]interface{}) *BaseContent {
+	return new(BaseContent).Init(dict)
+}
+
 func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 	if content.Dictionary.Init(dict) != nil {
 		// lazy load
