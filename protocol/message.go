@@ -75,7 +75,7 @@ import (
 type Message interface {
 	Map
 
-	GetDelegate() MessageDelegate
+	Delegate() MessageDelegate
 	SetDelegate(delegate MessageDelegate)
 
 	Envelope() Envelope
