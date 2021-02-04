@@ -66,7 +66,7 @@ type BaseContent struct {
 	_group ID
 }
 
-func NewContent(dict map[string]interface{}) *BaseContent {
+func NewBaseContent(dict map[string]interface{}) *BaseContent {
 	return new(BaseContent).Init(dict)
 }
 

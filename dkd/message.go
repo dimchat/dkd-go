@@ -100,7 +100,7 @@ func (msg *BaseMessage) InitWithEnvelope(env Envelope) *BaseMessage {
 	return msg
 }
 
-func (msg BaseMessage) Delegate() MessageDelegate {
+func (msg *BaseMessage) Delegate() MessageDelegate {
 	return msg._delegate
 }
 
@@ -136,10 +136,10 @@ func (msg *BaseMessage) Type() uint8 {
 }
 
 /**
- *  General Factories
- *  ~~~~~~~~~~~~~~~~~
+ *  Build Message Factories
+ *  ~~~~~~~~~~~~~~~~~~~~~~~
  */
-func BuildMessageFactories() {
+func init() {
 	BuildEnvelopeFactory()
 	BuildInstantMessageFactory()
 	BuildSecureMessageFactory()
