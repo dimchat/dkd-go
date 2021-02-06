@@ -132,7 +132,10 @@ func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
 		delete(msg, "visa")
 		delete(msg, "profile")
 	} else {
-		msg["visa"] = visa.GetMap(false)
+		doc, ok := visa.(Document)
+		if ok {
+			msg["visa"] = doc.GetMap(false)
+		}
 	}
 }
 

@@ -34,6 +34,7 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
+	"time"
 )
 
 /**
@@ -63,6 +64,10 @@ type EncryptedMessage struct {
 	_keys map[string]string
 }
 
+func NewEncryptedMessage(dict map[string]interface{}) *EncryptedMessage {
+	return new(EncryptedMessage).Init(dict)
+}
+
 func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage {
 	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
@@ -72,6 +77,64 @@ func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage
 	}
 	return msg
 }
+
+func (msg *EncryptedMessage) Equal(other interface{}) bool {
+	return msg.BaseMessage.Equal(other)
+}
+
+//-------- Map
+
+func (msg *EncryptedMessage) Get(name string) interface{} {
+	return msg.BaseMessage.Get(name)
+}
+
+func (msg *EncryptedMessage) Set(name string, value interface{}) {
+	msg.BaseMessage.Set(name, value)
+}
+
+func (msg *EncryptedMessage) Keys() []string {
+	return msg.BaseMessage.Keys()
+}
+
+func (msg *EncryptedMessage) GetMap(clone bool) map[string]interface{} {
+	return msg.BaseMessage.GetMap(clone)
+}
+
+//-------- Message
+
+func (msg *EncryptedMessage) Delegate() MessageDelegate {
+	return msg.BaseMessage.Delegate()
+}
+
+func (msg *EncryptedMessage) SetDelegate(delegate MessageDelegate) {
+	msg.BaseMessage.SetDelegate(delegate)
+}
+
+func (msg *EncryptedMessage) Envelope() Envelope {
+	return msg.BaseMessage.Envelope()
+}
+
+func (msg *EncryptedMessage) Sender() ID {
+	return msg.BaseMessage.Sender()
+}
+
+func (msg *EncryptedMessage) Receiver() ID {
+	return msg.BaseMessage.Receiver()
+}
+
+func (msg *EncryptedMessage) Time() time.Time {
+	return msg.BaseMessage.Time()
+}
+
+func (msg *EncryptedMessage) Group() ID {
+	return msg.BaseMessage.Group()
+}
+
+func (msg *EncryptedMessage) Type() uint8 {
+	return msg.BaseMessage.Type()
+}
+
+//-------- SecureMessage
 
 func (msg *EncryptedMessage) EncryptedData() []byte {
 	if msg._data == nil {
@@ -316,9 +379,9 @@ type EncryptedMessageFactory struct {
 func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
 	if _, exists := msg["signature"]; exists {
 		// this should be a reliable message
-		return new(RelayMessage).Init(msg)
+		return NewRelayMessage(msg)
 	}
-	return new(EncryptedMessage).Init(msg)
+	return NewEncryptedMessage(msg)
 }
 
 func BuildSecureMessageFactory() SecureMessageFactory {

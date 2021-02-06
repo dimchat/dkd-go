@@ -33,6 +33,7 @@ package dkd
 import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
+	"time"
 )
 
 /**
@@ -66,6 +67,10 @@ type RelayMessage struct {
 	_visa Visa
 }
 
+func NewRelayMessage(dict map[string]interface{}) *RelayMessage {
+	return new(RelayMessage).Init(dict)
+}
+
 func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
 	if msg.EncryptedMessage.Init(dict) != nil {
 		// lazy load
@@ -74,6 +79,92 @@ func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
 		msg._visa = nil
 	}
 	return msg
+}
+
+func (msg *RelayMessage) Equal(other interface{}) bool {
+	return msg.SecureMessage.Equal(other)
+}
+
+//-------- Map
+
+func (msg *RelayMessage) Get(name string) interface{} {
+	return msg.SecureMessage.Get(name)
+}
+
+func (msg *RelayMessage) Set(name string, value interface{}) {
+	msg.SecureMessage.Set(name, value)
+}
+
+func (msg *RelayMessage) Keys() []string {
+	return msg.SecureMessage.Keys()
+}
+
+func (msg *RelayMessage) GetMap(clone bool) map[string]interface{} {
+	return msg.SecureMessage.GetMap(clone)
+}
+
+//-------- Message
+
+func (msg *RelayMessage) Delegate() MessageDelegate {
+	return msg.SecureMessage.Delegate()
+}
+
+func (msg *RelayMessage) SetDelegate(delegate MessageDelegate) {
+	msg.SecureMessage.SetDelegate(delegate)
+}
+
+func (msg *RelayMessage) Envelope() Envelope {
+	return msg.SecureMessage.Envelope()
+}
+
+func (msg *RelayMessage) Sender() ID {
+	return msg.SecureMessage.Sender()
+}
+
+func (msg *RelayMessage) Receiver() ID {
+	return msg.SecureMessage.Receiver()
+}
+
+func (msg *RelayMessage) Time() time.Time {
+	return msg.SecureMessage.Time()
+}
+
+func (msg *RelayMessage) Group() ID {
+	return msg.SecureMessage.Group()
+}
+
+func (msg *RelayMessage) Type() uint8 {
+	return msg.SecureMessage.Type()
+}
+
+//-------- SecureMessage
+
+func (msg *RelayMessage) EncryptedData() []byte {
+	return msg.SecureMessage.EncryptedData()
+}
+
+func (msg *RelayMessage) EncryptedKey() []byte {
+	return msg.SecureMessage.EncryptedKey()
+}
+
+func (msg *RelayMessage) EncryptedKeys() map[string]string {
+	return msg.SecureMessage.EncryptedKeys()
+}
+
+func (msg *RelayMessage) Decrypt() InstantMessage {
+	return msg.SecureMessage.Decrypt()
+}
+
+func (msg *RelayMessage) Sign() ReliableMessage {
+	return msg.SecureMessage.Sign()
+}
+
+func (msg *RelayMessage) Split(members []ID) []SecureMessage {
+	return msg.SecureMessage.Split(members)
+}
+
+func (msg *RelayMessage) Trim(member ID) SecureMessage {
+	return msg.SecureMessage.Trim(member)
 }
 
 func (msg *RelayMessage) Signature() []byte {
@@ -160,7 +251,7 @@ type RelayMessageFactory struct {
 }
 
 func (factory *RelayMessageFactory) ParseSecureMessage(msg map[string]interface{}) ReliableMessage {
-	return new(RelayMessage).Init(msg)
+	return NewRelayMessage(msg)
 }
 
 func BuildReliableMessageFactory() ReliableMessageFactory {

@@ -91,14 +91,29 @@ func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
 	return msg
 }
 
-func (msg *BaseMessage) InitWithEnvelope(env Envelope) *BaseMessage {
-	dict := env.GetMap(false)
-	if msg.Dictionary.Init(dict) != nil {
-		msg._env = env
-		msg._delegate = nil
-	}
-	return msg
+func (msg *BaseMessage) Equal(other interface{}) bool {
+	return msg.Dictionary.Equal(other)
 }
+
+//-------- Map
+
+func (msg *BaseMessage) Get(name string) interface{} {
+	return msg.Dictionary.Get(name)
+}
+
+func (msg *BaseMessage) Set(name string, value interface{}) {
+	msg.Dictionary.Set(name, value)
+}
+
+func (msg *BaseMessage) Keys() []string {
+	return msg.Dictionary.Keys()
+}
+
+func (msg *BaseMessage) GetMap(clone bool) map[string]interface{} {
+	return msg.Dictionary.GetMap(clone)
+}
+
+//-------- Message
 
 func (msg *BaseMessage) Delegate() MessageDelegate {
 	return msg._delegate

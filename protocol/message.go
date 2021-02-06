@@ -80,6 +80,7 @@ type Message interface {
 
 	Envelope() Envelope
 
+	// properties within envelope
 	Sender() ID
 	Receiver() ID
 	Time() time.Time

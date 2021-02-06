@@ -57,8 +57,17 @@ type PlainMessage struct {
 	_content Content
 }
 
-func NewPlainMessage(head Envelope, body Content) *PlainMessage {
-	return new(PlainMessage).InitWithEnvelope(head, body)
+func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *PlainMessage {
+	if dict == nil {
+		dict = head.GetMap(false)
+		dict["content"] = body.GetMap(false)
+	}
+	msg := new(PlainMessage).Init(dict)
+	if msg != nil {
+		msg._env = head
+		msg._content = body
+	}
+	return msg
 }
 
 func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
@@ -69,19 +78,48 @@ func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
 	return msg
 }
 
-func (msg *PlainMessage) InitWithEnvelope(env Envelope, body Content) *PlainMessage {
-	if msg.BaseMessage.InitWithEnvelope(env) != nil {
-		msg._content = body
-		msg.Set("content", body.GetMap(false))
-	}
-	return msg
+func (msg *PlainMessage) Equal(other interface{}) bool {
+	return msg.BaseMessage.Equal(other)
 }
 
-func (msg *PlainMessage) Content() Content {
-	if msg._content == nil {
-		msg._content = InstantMessageGetContent(msg.GetMap(false))
-	}
-	return msg._content
+//-------- Map
+
+func (msg *PlainMessage) Get(name string) interface{} {
+	return msg.BaseMessage.Get(name)
+}
+
+func (msg *PlainMessage) Set(name string, value interface{}) {
+	msg.BaseMessage.Set(name, value)
+}
+
+func (msg *PlainMessage) Keys() []string {
+	return msg.BaseMessage.Keys()
+}
+
+func (msg *PlainMessage) GetMap(clone bool) map[string]interface{} {
+	return msg.BaseMessage.GetMap(clone)
+}
+
+//-------- Message
+
+func (msg *PlainMessage) Delegate() MessageDelegate {
+	return msg.BaseMessage.Delegate()
+}
+
+func (msg *PlainMessage) SetDelegate(delegate MessageDelegate) {
+	msg.BaseMessage.SetDelegate(delegate)
+}
+
+func (msg *PlainMessage) Envelope() Envelope {
+	return msg.BaseMessage.Envelope()
+}
+
+func (msg *PlainMessage) Sender() ID {
+	return msg.BaseMessage.Sender()
+}
+
+func (msg *PlainMessage) Receiver() ID {
+	return msg.BaseMessage.Receiver()
 }
 
 func (msg *PlainMessage) Time() time.Time {
@@ -98,6 +136,15 @@ func (msg *PlainMessage) Group() ID {
 
 func (msg *PlainMessage) Type() uint8 {
 	return msg.Content().Type()
+}
+
+//-------- InstantMessage
+
+func (msg *PlainMessage) Content() Content {
+	if msg._content == nil {
+		msg._content = InstantMessageGetContent(msg.GetMap(false))
+	}
+	return msg._content
 }
 
 /*
@@ -190,11 +237,11 @@ type PlainMessageFactory struct {
 }
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
-	return NewPlainMessage(head, body)
+	return NewPlainMessage(nil, head, body)
 }
 
 func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {
-	return new(PlainMessage).Init(msg)
+	return NewPlainMessage(msg, nil, nil)
 }
 
 func BuildInstantMessageFactory() InstantMessageFactory {

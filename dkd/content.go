@@ -102,6 +102,30 @@ func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 	return content
 }
 
+func (content *BaseContent) Equal(other interface{}) bool {
+	return content.Dictionary.Equal(other)
+}
+
+//-------- Map
+
+func (content *BaseContent) Get(name string) interface{} {
+	return content.Dictionary.Get(name)
+}
+
+func (content *BaseContent) Set(name string, value interface{}) {
+	content.Dictionary.Set(name, value)
+}
+
+func (content *BaseContent) Keys() []string {
+	return content.Dictionary.Keys()
+}
+
+func (content *BaseContent) GetMap(clone bool) map[string]interface{} {
+	return content.Dictionary.GetMap(clone)
+}
+
+//-------- Content
+
 func (content *BaseContent) Type() uint8 {
 	if content._type == 0 {
 		content._type = ContentGetType(content.GetMap(false))

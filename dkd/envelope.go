@@ -58,14 +58,16 @@ type MessageEnvelope struct {
 	_time time.Time
 }
 
-func NewMessageEnvelope(from ID, to ID, when time.Time) *MessageEnvelope {
-	if when.IsZero() {
-		when = time.Now()
+func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when time.Time) *MessageEnvelope {
+	if dict == nil {
+		if when.IsZero() {
+			when = time.Now()
+		}
+		dict = make(map[string]interface{})
+		dict["sender"] = from.String()
+		dict["receiver"] = to.String()
+		dict["time"] = when.Unix()
 	}
-	dict := make(map[string]interface{})
-	dict["sender"] = from.String()
-	dict["receiver"] = to.String()
-	dict["time"] = when.Unix()
 	env := new(MessageEnvelope).Init(dict)
 	if env != nil {
 		env._sender = from
@@ -84,6 +86,30 @@ func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
 	}
 	return env
 }
+
+func (env *MessageEnvelope) Equal(other interface{}) bool {
+	return env.Dictionary.Equal(other)
+}
+
+//-------- Map
+
+func (env *MessageEnvelope) Get(name string) interface{} {
+	return env.Dictionary.Get(name)
+}
+
+func (env *MessageEnvelope) Set(name string, value interface{}) {
+	env.Dictionary.Set(name, value)
+}
+
+func (env *MessageEnvelope) Keys() []string {
+	return env.Dictionary.Keys()
+}
+
+func (env *MessageEnvelope) GetMap(clone bool) map[string]interface{} {
+	return env.Dictionary.GetMap(clone)
+}
+
+//-------- Envelope
 
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
@@ -146,11 +172,11 @@ type MessageEnvelopeFactory struct {
 }
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
-	return NewMessageEnvelope(from, to, when)
+	return NewMessageEnvelope(nil, from, to, when)
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
-	return new(MessageEnvelope).Init(env)
+	return NewMessageEnvelope(env, nil, nil, time.Time{})
 }
 
 func BuildEnvelopeFactory() EnvelopeFactory {
