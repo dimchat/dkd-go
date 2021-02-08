@@ -205,18 +205,23 @@ func ContentParse(content interface{}) Content {
 	if content == nil {
 		return nil
 	}
-	var info map[string]interface{}
-	value := ObjectValue(content)
-	switch value.(type) {
-	case Content:
-		return value.(Content)
-	case Map:
-		info = value.(Map).GetMap(false)
-	case map[string]interface{}:
-		info = value.(map[string]interface{})
-	default:
-		panic(content)
+	value, ok := content.(Content)
+	if ok {
+		return value
 	}
+	// get content info
+	var info map[string]interface{}
+	wrapper, ok := content.(Map)
+	if ok {
+		info = wrapper.GetMap(false)
+	} else {
+		info, ok = content.(map[string]interface{})
+		if !ok {
+			panic(content)
+			return nil
+		}
+	}
+	// get content factory by type
 	msgType := ContentGetType(info)
 	factory := ContentGetFactory(msgType)
 	if factory == nil {

@@ -171,18 +171,23 @@ func ReliableMessageParse(msg interface{}) ReliableMessage {
 	if msg == nil {
 		return nil
 	}
-	var info map[string]interface{}
-	value := ObjectValue(msg)
-	switch value.(type) {
-	case ReliableMessage:
-		return value.(ReliableMessage)
-	case Map:
-		info = value.(Map).GetMap(false)
-	case map[string]interface{}:
-		info = value.(map[string]interface{})
-	default:
-		panic(msg)
+	value, ok := msg.(ReliableMessage)
+	if ok {
+		return value
 	}
+	// get message info
+	var info map[string]interface{}
+	wrapper, ok := msg.(Map)
+	if ok {
+		info = wrapper.GetMap(false)
+	} else {
+		info, ok = msg.(map[string]interface{})
+		if !ok {
+			panic(msg)
+			return nil
+		}
+	}
+	// create by message factory
 	factory := ReliableMessageGetFactory()
 	return factory.ParseReliableMessage(info)
 }

@@ -179,18 +179,23 @@ func EnvelopeParse(env interface{}) Envelope {
 	if env == nil {
 		return nil
 	}
-	var info map[string]interface{}
-	value := ObjectValue(env)
-	switch value.(type) {
-	case Envelope:
-		return value.(Envelope)
-	case Map:
-		info = value.(Map).GetMap(false)
-	case map[string]interface{}:
-		info = value.(map[string]interface{})
-	default:
-		panic(env)
+	value, ok := env.(Envelope)
+	if ok {
+		return value
 	}
+	// get envelope info
+	var info map[string]interface{}
+	wrapper, ok := env.(Map)
+	if ok {
+		info = wrapper.GetMap(false)
+	} else {
+		info, ok = env.(map[string]interface{})
+		if !ok {
+			panic(env)
+			return nil
+		}
+	}
+	// create by envelope factory
 	factory := EnvelopeGetFactory()
 	return factory.ParseEnvelope(info)
 }
