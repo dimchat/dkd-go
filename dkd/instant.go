@@ -252,3 +252,7 @@ func BuildInstantMessageFactory() InstantMessageFactory {
 	}
 	return factory
 }
+
+func init() {
+	BuildInstantMessageFactory()
+}

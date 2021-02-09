@@ -262,3 +262,7 @@ func BuildReliableMessageFactory() ReliableMessageFactory {
 	}
 	return factory
 }
+
+func init() {
+	BuildReliableMessageFactory()
+}
