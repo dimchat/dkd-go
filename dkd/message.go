@@ -149,3 +149,14 @@ func (msg *BaseMessage) Group() ID {
 func (msg *BaseMessage) Type() uint8 {
 	return msg.Envelope().Type()
 }
+
+/**
+ *  Build Message Factories
+ *  ~~~~~~~~~~~~~~~~~~~~~~~
+ */
+func init() {
+	BuildEnvelopeFactory()
+	BuildInstantMessageFactory()
+	BuildSecureMessageFactory()
+	BuildReliableMessageFactory()
+}

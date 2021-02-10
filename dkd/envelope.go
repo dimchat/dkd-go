@@ -187,7 +187,3 @@ func BuildEnvelopeFactory() EnvelopeFactory {
 	}
 	return factory
 }
-
-func init() {
-	BuildEnvelopeFactory()
-}

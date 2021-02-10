@@ -167,6 +167,8 @@ func (msg *RelayMessage) Trim(member ID) SecureMessage {
 	return msg.SecureMessage.Trim(member)
 }
 
+//-------- ReliableMessage
+
 func (msg *RelayMessage) Signature() []byte {
 	if msg._signature == nil {
 		base64 := msg.Get("signature")
@@ -261,8 +263,4 @@ func BuildReliableMessageFactory() ReliableMessageFactory {
 		ReliableMessageSetFactory(factory)
 	}
 	return factory
-}
-
-func init() {
-	BuildReliableMessageFactory()
 }

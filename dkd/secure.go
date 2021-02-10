@@ -392,7 +392,3 @@ func BuildSecureMessageFactory() SecureMessageFactory {
 	}
 	return factory
 }
-
-func init() {
-	BuildSecureMessageFactory()
-}
