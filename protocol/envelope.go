@@ -50,6 +50,9 @@ import (
  */
 type Envelope interface {
 	Map
+	IEnvelope
+}
+type IEnvelope interface {
 
 	/**
 	 * Get message sender

@@ -52,7 +52,7 @@ import (
  */
 type PlainMessage struct {
 	BaseMessage
-	InstantMessage
+	IInstantMessage
 
 	_content Content
 }
@@ -78,49 +78,7 @@ func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
 	return msg
 }
 
-func (msg *PlainMessage) Equal(other interface{}) bool {
-	return msg.BaseMessage.Equal(other)
-}
-
-//-------- Map
-
-func (msg *PlainMessage) Get(name string) interface{} {
-	return msg.BaseMessage.Get(name)
-}
-
-func (msg *PlainMessage) Set(name string, value interface{}) {
-	msg.BaseMessage.Set(name, value)
-}
-
-func (msg *PlainMessage) Keys() []string {
-	return msg.BaseMessage.Keys()
-}
-
-func (msg *PlainMessage) GetMap(clone bool) map[string]interface{} {
-	return msg.BaseMessage.GetMap(clone)
-}
-
-//-------- Message
-
-func (msg *PlainMessage) Delegate() MessageDelegate {
-	return msg.BaseMessage.Delegate()
-}
-
-func (msg *PlainMessage) SetDelegate(delegate MessageDelegate) {
-	msg.BaseMessage.SetDelegate(delegate)
-}
-
-func (msg *PlainMessage) Envelope() Envelope {
-	return msg.BaseMessage.Envelope()
-}
-
-func (msg *PlainMessage) Sender() ID {
-	return msg.BaseMessage.Sender()
-}
-
-func (msg *PlainMessage) Receiver() ID {
-	return msg.BaseMessage.Receiver()
-}
+//-------- IMessage
 
 func (msg *PlainMessage) Time() time.Time {
 	msgTime := msg.Content().Time()
@@ -138,7 +96,7 @@ func (msg *PlainMessage) Type() uint8 {
 	return msg.Content().Type()
 }
 
-//-------- InstantMessage
+//-------- IInstantMessage
 
 func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {

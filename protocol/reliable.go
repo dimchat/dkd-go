@@ -58,6 +58,9 @@ import (
  */
 type ReliableMessage interface {
 	SecureMessage
+	IReliableMessage
+}
+type IReliableMessage interface {
 
 	Signature() []byte
 

@@ -74,6 +74,9 @@ import (
  */
 type Message interface {
 	Map
+	IMessage
+}
+type IMessage interface {
 
 	Delegate() MessageDelegate
 	SetDelegate(delegate MessageDelegate)

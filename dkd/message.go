@@ -75,7 +75,7 @@ import (
  */
 type BaseMessage struct {
 	Dictionary
-	Message
+	IMessage
 
 	_env Envelope
 
@@ -91,29 +91,7 @@ func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
 	return msg
 }
 
-func (msg *BaseMessage) Equal(other interface{}) bool {
-	return msg.Dictionary.Equal(other)
-}
-
-//-------- Map
-
-func (msg *BaseMessage) Get(name string) interface{} {
-	return msg.Dictionary.Get(name)
-}
-
-func (msg *BaseMessage) Set(name string, value interface{}) {
-	msg.Dictionary.Set(name, value)
-}
-
-func (msg *BaseMessage) Keys() []string {
-	return msg.Dictionary.Keys()
-}
-
-func (msg *BaseMessage) GetMap(clone bool) map[string]interface{} {
-	return msg.Dictionary.GetMap(clone)
-}
-
-//-------- Message
+//-------- IMessage
 
 func (msg *BaseMessage) Delegate() MessageDelegate {
 	return msg._delegate

@@ -55,6 +55,9 @@ import (
  */
 type SecureMessage interface {
 	Message
+	ISecureMessage
+}
+type ISecureMessage interface {
 
 	EncryptedData() []byte
 	EncryptedKey() []byte

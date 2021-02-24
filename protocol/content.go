@@ -131,6 +131,9 @@ const (
  */
 type Content interface {
 	Map
+	IContent
+}
+type IContent interface {
 
 	Type() uint8      // message type
 	SN() uint32       // serial number as message id

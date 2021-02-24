@@ -51,6 +51,9 @@ import (
  */
 type InstantMessage interface {
 	Message
+	IInstantMessage
+}
+type IInstantMessage interface {
 
 	Content() Content
 

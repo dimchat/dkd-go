@@ -51,7 +51,7 @@ import (
  */
 type MessageEnvelope struct {
 	Dictionary
-	Envelope
+	IEnvelope
 
 	_sender ID
 	_receiver ID
@@ -87,29 +87,7 @@ func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
 	return env
 }
 
-func (env *MessageEnvelope) Equal(other interface{}) bool {
-	return env.Dictionary.Equal(other)
-}
-
-//-------- Map
-
-func (env *MessageEnvelope) Get(name string) interface{} {
-	return env.Dictionary.Get(name)
-}
-
-func (env *MessageEnvelope) Set(name string, value interface{}) {
-	env.Dictionary.Set(name, value)
-}
-
-func (env *MessageEnvelope) Keys() []string {
-	return env.Dictionary.Keys()
-}
-
-func (env *MessageEnvelope) GetMap(clone bool) map[string]interface{} {
-	return env.Dictionary.GetMap(clone)
-}
-
-//-------- Envelope
+//-------- IEnvelope
 
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
