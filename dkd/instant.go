@@ -62,20 +62,40 @@ func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *
 		dict = head.GetMap(false)
 		dict["content"] = body.GetMap(false)
 	}
-	msg := new(PlainMessage).Init(dict)
-	if msg != nil {
-		msg._env = head
-		msg._content = body
+	msg := new(PlainMessage)
+	if msg.BaseMessage.Init(msg, dict) != nil {
+		msg.setEnvelope(head)
+		msg.setContent(body)
 	}
 	return msg
 }
 
-func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
-	if msg.BaseMessage.Init(dict) != nil {
+func (msg *PlainMessage) Init(this InstantMessage, dict map[string]interface{}) *PlainMessage {
+	if msg.BaseMessage.Init(this, dict) != nil {
 		// lazy load
-		msg._content = nil
+		msg.setContent(nil)
 	}
 	return msg
+}
+
+func (msg *PlainMessage) Release() int {
+	cnt := msg.BaseMessage.Release()
+	if cnt == 0 {
+		// this object is going to be destroyed,
+		// release children
+		msg.setContent(nil)
+	}
+	return cnt
+}
+
+func (msg *PlainMessage) setContent(content Content)  {
+	if content != nil {
+		content.Retain()
+	}
+	if msg._content != nil {
+		msg._content.Release()
+	}
+	msg._content = content
 }
 
 //-------- IMessage
@@ -100,7 +120,7 @@ func (msg *PlainMessage) Type() uint8 {
 
 func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {
-		msg._content = InstantMessageGetContent(msg.GetMap(false))
+		msg.setContent(InstantMessageGetContent(msg.GetMap(false)))
 	}
 	return msg._content
 }

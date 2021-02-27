@@ -67,17 +67,50 @@ type RelayMessage struct {
 }
 
 func NewRelayMessage(dict map[string]interface{}) *RelayMessage {
-	return new(RelayMessage).Init(dict)
+	msg := new(RelayMessage)
+	return msg.Init(msg, dict)
 }
 
-func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
-	if msg.EncryptedMessage.Init(dict) != nil {
+func (msg *RelayMessage) Init(this ReliableMessage, dict map[string]interface{}) *RelayMessage {
+	if msg.EncryptedMessage.Init(this, dict) != nil {
 		// lazy load
 		msg._signature = nil
-		msg._meta = nil
-		msg._visa = nil
+
+		msg.setMeta(nil)
+		msg.setVisa(nil)
 	}
 	return msg
+}
+
+func (msg *RelayMessage) Release() int {
+	cnt := msg.EncryptedMessage.Release()
+	if cnt == 0 {
+		// this object is going to be destroyed,
+		// release children
+		msg.setMeta(nil)
+		msg.setVisa(nil)
+	}
+	return cnt
+}
+
+func (msg *RelayMessage) setMeta(meta Meta)  {
+	if meta != nil {
+		meta.Retain()
+	}
+	if msg._meta != nil {
+		msg._meta.Release()
+	}
+	msg._meta = meta
+}
+
+func (msg *RelayMessage) setVisa(visa Visa)  {
+	if visa != nil {
+		visa.Retain()
+	}
+	if msg._visa != nil {
+		msg._visa.Release()
+	}
+	msg._visa = visa
 }
 
 //-------- IReliableMessage
@@ -93,26 +126,26 @@ func (msg *RelayMessage) Signature() []byte {
 
 func (msg *RelayMessage) Meta() Meta {
 	if msg._meta == nil {
-		msg._meta = ReliableMessageGetMeta(msg.GetMap(false))
+		msg.setMeta(ReliableMessageGetMeta(msg.GetMap(false)))
 	}
 	return msg._meta
 }
 
 func (msg *RelayMessage) SetMeta(meta Meta) {
 	ReliableMessageSetMeta(msg.GetMap(false), meta)
-	msg._meta = meta
+	msg.setMeta(meta)
 }
 
 func (msg *RelayMessage) Visa() Visa {
 	if msg._visa == nil {
-		msg._visa = ReliableMessageGetVisa(msg.GetMap(false))
+		msg.setVisa(ReliableMessageGetVisa(msg.GetMap(false)))
 	}
 	return msg._visa
 }
 
 func (msg *RelayMessage) SetVisa(visa Visa) {
 	ReliableMessageSetVisa(msg.GetMap(false), visa)
-	msg._visa = visa
+	msg.setVisa(visa)
 }
 
 /*

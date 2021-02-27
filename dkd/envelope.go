@@ -68,37 +68,68 @@ func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when time.T
 		dict["receiver"] = to.String()
 		dict["time"] = when.Unix()
 	}
-	env := new(MessageEnvelope).Init(dict)
-	if env != nil {
-		env._sender = from
-		env._receiver = to
+	env := new(MessageEnvelope)
+	if env.Init(env, dict) != nil {
+		env.setSender(from)
+		env.setReceiver(to)
 		env._time = when
 	}
 	return env
 }
 
-func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
-	if env.Dictionary.Init(dict) != nil {
+func (env *MessageEnvelope) Init(this Envelope, dict map[string]interface{}) *MessageEnvelope {
+	if env.Dictionary.Init(this, dict) != nil {
 		// lazy load
-		env._sender = nil
-		env._receiver = nil
+		env.setSender(nil)
+		env.setReceiver(nil)
 		env._time = time.Unix(0, 0)
 	}
 	return env
+}
+
+func (env *MessageEnvelope) Release() int {
+	cnt := env.Dictionary.Release()
+	if cnt == 0 {
+		// this object is going to be destroyed,
+		// release children
+		env.setSender(nil)
+		env.setReceiver(nil)
+	}
+	return cnt
+}
+
+func (env *MessageEnvelope) setSender(sender ID)  {
+	if sender != nil {
+		sender.Retain()
+	}
+	if env._sender != nil {
+		env._sender.Release()
+	}
+	env._sender = sender
+}
+
+func (env *MessageEnvelope) setReceiver(receiver ID)  {
+	if receiver != nil {
+		receiver.Retain()
+	}
+	if env._receiver != nil {
+		env._receiver.Release()
+	}
+	env._receiver = receiver
 }
 
 //-------- IEnvelope
 
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
-		env._sender = EnvelopeGetSender(env.GetMap(false))
+		env.setSender(EnvelopeGetSender(env.GetMap(false)))
 	}
 	return env._sender
 }
 
 func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
-		env._receiver = EnvelopeGetReceiver(env.GetMap(false))
+		env.setReceiver(EnvelopeGetReceiver(env.GetMap(false)))
 	}
 	return env._receiver
 }
