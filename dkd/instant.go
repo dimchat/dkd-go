@@ -34,6 +34,7 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
+	. "github.com/dimchat/mkm-go/types"
 	"time"
 )
 
@@ -89,13 +90,11 @@ func (msg *PlainMessage) Release() int {
 }
 
 func (msg *PlainMessage) setContent(content Content)  {
-	if content != nil {
-		content.Retain()
+	if content != msg._content {
+		ObjectRetain(content)
+		ObjectRelease(msg._content)
+		msg._content = content
 	}
-	if msg._content != nil {
-		msg._content.Release()
-	}
-	msg._content = content
 }
 
 //-------- IMessage
@@ -215,11 +214,15 @@ type PlainMessageFactory struct {
 }
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
-	return NewPlainMessage(nil, head, body)
+	iMsg := NewPlainMessage(nil, head, body)
+	iMsg.AutoRelease()
+	return iMsg
 }
 
 func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {
-	return NewPlainMessage(msg, nil, nil)
+	iMsg := NewPlainMessage(msg, nil, nil)
+	iMsg.AutoRelease()
+	return iMsg
 }
 
 func BuildInstantMessageFactory() InstantMessageFactory {

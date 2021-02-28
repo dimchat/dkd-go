@@ -102,13 +102,11 @@ func (msg *BaseMessage) Release() int {
 }
 
 func (msg *BaseMessage) setEnvelope(env Envelope)  {
-	if env != nil {
-		env.Retain()
+	if env != msg._env {
+		ObjectRetain(env)
+		ObjectRelease(msg._env)
+		msg._env = env
 	}
-	if msg._env != nil {
-		msg._env.Release()
-	}
-	msg._env = env
 }
 
 //-------- IMessage

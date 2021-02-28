@@ -321,11 +321,15 @@ type EncryptedMessageFactory struct {
 }
 
 func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
+	var sMsg SecureMessage
 	if _, exists := msg["signature"]; exists {
 		// this should be a reliable message
-		return NewRelayMessage(msg)
+		sMsg = NewRelayMessage(msg)
+	} else {
+		sMsg = NewEncryptedMessage(msg)
 	}
-	return NewEncryptedMessage(msg)
+	sMsg.AutoRelease()
+	return sMsg
 }
 
 func BuildSecureMessageFactory() SecureMessageFactory {

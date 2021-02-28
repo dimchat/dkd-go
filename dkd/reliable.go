@@ -33,6 +33,7 @@ package dkd
 import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
+	. "github.com/dimchat/mkm-go/types"
 )
 
 /**
@@ -94,23 +95,19 @@ func (msg *RelayMessage) Release() int {
 }
 
 func (msg *RelayMessage) setMeta(meta Meta)  {
-	if meta != nil {
-		meta.Retain()
+	if meta != msg._meta {
+		ObjectRetain(meta)
+		ObjectRelease(msg._meta)
+		msg._meta = meta
 	}
-	if msg._meta != nil {
-		msg._meta.Release()
-	}
-	msg._meta = meta
 }
 
 func (msg *RelayMessage) setVisa(visa Visa)  {
-	if visa != nil {
-		visa.Retain()
+	if visa != msg._visa {
+		ObjectRetain(visa)
+		ObjectRelease(msg._visa)
+		msg._visa = visa
 	}
-	if msg._visa != nil {
-		msg._visa.Release()
-	}
-	msg._visa = visa
 }
 
 //-------- IReliableMessage
@@ -199,7 +196,9 @@ type RelayMessageFactory struct {
 }
 
 func (factory *RelayMessageFactory) ParseSecureMessage(msg map[string]interface{}) ReliableMessage {
-	return NewRelayMessage(msg)
+	rMsg := NewRelayMessage(msg)
+	rMsg.AutoRelease()
+	return rMsg
 }
 
 func BuildReliableMessageFactory() ReliableMessageFactory {

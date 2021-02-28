@@ -66,6 +66,7 @@ type BaseContent struct {
 	_group ID
 }
 
+/* designated initializer */
 func (content *BaseContent) Init(this Content, dict map[string]interface{}) *BaseContent {
 	if content.Dictionary.Init(this, dict) != nil {
 		// lazy load
@@ -77,6 +78,7 @@ func (content *BaseContent) Init(this Content, dict map[string]interface{}) *Bas
 	return content
 }
 
+/* designated initializer */
 func (content *BaseContent) InitWithType(this Content, msgType uint8) *BaseContent {
 	// message time
 	now := time.Now()
@@ -109,13 +111,11 @@ func (content *BaseContent) Release() int {
 }
 
 func (content *BaseContent) setGroup(group ID)  {
-	if group != nil {
-		group.Retain()
+	if group != content._group {
+		ObjectRetain(group)
+		ObjectRelease(content._group)
+		content._group = group
 	}
-	if content._group != nil {
-		content._group.Release()
-	}
-	content._group = group
 }
 
 //-------- IContent

@@ -110,7 +110,11 @@ type InstantMessageFactory interface {
 var instantFactory InstantMessageFactory = nil
 
 func InstantMessageSetFactory(factory InstantMessageFactory) {
-	instantFactory = factory
+	if factory != instantFactory {
+		ObjectRetain(factory)
+		ObjectRelease(instantFactory)
+		instantFactory = factory
+	}
 }
 
 func InstantMessageGetFactory() InstantMessageFactory {

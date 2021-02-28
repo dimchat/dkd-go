@@ -145,7 +145,11 @@ type SecureMessageFactory interface {
 var secureFactory SecureMessageFactory = nil
 
 func SecureMessageSetFactory(factory SecureMessageFactory) {
-	secureFactory = factory
+	if factory != secureFactory {
+		ObjectRetain(factory)
+		ObjectRelease(secureFactory)
+		secureFactory = factory
+	}
 }
 
 func SecureMessageGetFactory() SecureMessageFactory {

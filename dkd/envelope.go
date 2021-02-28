@@ -99,23 +99,19 @@ func (env *MessageEnvelope) Release() int {
 }
 
 func (env *MessageEnvelope) setSender(sender ID)  {
-	if sender != nil {
-		sender.Retain()
+	if sender != env._sender {
+		ObjectRetain(sender)
+		ObjectRelease(env._sender)
+		env._sender = sender
 	}
-	if env._sender != nil {
-		env._sender.Release()
-	}
-	env._sender = sender
 }
 
 func (env *MessageEnvelope) setReceiver(receiver ID)  {
-	if receiver != nil {
-		receiver.Retain()
+	if receiver != env._receiver {
+		ObjectRetain(receiver)
+		ObjectRelease(env._receiver)
+		env._receiver = receiver
 	}
-	if env._receiver != nil {
-		env._receiver.Release()
-	}
-	env._receiver = receiver
 }
 
 //-------- IEnvelope
@@ -181,11 +177,15 @@ type MessageEnvelopeFactory struct {
 }
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
-	return NewMessageEnvelope(nil, from, to, when)
+	envelope := NewMessageEnvelope(nil, from, to, when)
+	envelope.AutoRelease()
+	return envelope
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
-	return NewMessageEnvelope(env, nil, nil, time.Time{})
+	envelope := NewMessageEnvelope(env, nil, nil, time.Time{})
+	envelope.AutoRelease()
+	return envelope
 }
 
 func BuildEnvelopeFactory() EnvelopeFactory {

@@ -163,7 +163,11 @@ type EnvelopeFactory interface {
 var envelopeFactory EnvelopeFactory = nil
 
 func EnvelopeSetFactory(factory EnvelopeFactory) {
-	envelopeFactory = factory
+	if factory != envelopeFactory {
+		ObjectRetain(factory)
+		ObjectRelease(envelopeFactory)
+		envelopeFactory = factory
+	}
 }
 
 func EnvelopeGetFactory() EnvelopeFactory {
