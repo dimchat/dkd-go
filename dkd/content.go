@@ -67,8 +67,8 @@ type BaseContent struct {
 }
 
 /* designated initializer */
-func (content *BaseContent) Init(this Content, dict map[string]interface{}) *BaseContent {
-	if content.Dictionary.Init(this, dict) != nil {
+func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
+	if content.Dictionary.Init(dict) != nil {
 		// lazy load
 		content._type = 0
 		content._sn = 0
@@ -79,7 +79,7 @@ func (content *BaseContent) Init(this Content, dict map[string]interface{}) *Bas
 }
 
 /* designated initializer */
-func (content *BaseContent) InitWithType(this Content, msgType uint8) *BaseContent {
+func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 	// message time
 	now := time.Now()
 	stamp := now.Unix()
@@ -91,7 +91,7 @@ func (content *BaseContent) InitWithType(this Content, msgType uint8) *BaseConte
 	dict["type"] = msgType
 	dict["sn"] = sn
 	dict["time"] = stamp
-	if content.Dictionary.Init(this, dict) != nil {
+	if content.Dictionary.Init(dict) != nil {
 		content._type = msgType
 		content._sn = sn
 		content._time = now

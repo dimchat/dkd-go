@@ -64,15 +64,16 @@ func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *
 		dict["content"] = body.GetMap(false)
 	}
 	msg := new(PlainMessage)
-	if msg.BaseMessage.Init(msg, dict) != nil {
+	if msg.BaseMessage.Init(dict) != nil {
 		msg.setEnvelope(head)
 		msg.setContent(body)
 	}
+	ObjectRetain(msg)
 	return msg
 }
 
-func (msg *PlainMessage) Init(this InstantMessage, dict map[string]interface{}) *PlainMessage {
-	if msg.BaseMessage.Init(this, dict) != nil {
+func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
+	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
 		msg.setContent(nil)
 	}
@@ -215,13 +216,13 @@ type PlainMessageFactory struct {
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
 	iMsg := NewPlainMessage(nil, head, body)
-	iMsg.AutoRelease()
+	ObjectAutorelease(iMsg)
 	return iMsg
 }
 
 func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {
 	iMsg := NewPlainMessage(msg, nil, nil)
-	iMsg.AutoRelease()
+	ObjectAutorelease(iMsg)
 	return iMsg
 }
 

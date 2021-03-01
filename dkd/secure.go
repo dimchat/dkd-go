@@ -64,12 +64,13 @@ type EncryptedMessage struct {
 }
 
 func NewEncryptedMessage(dict map[string]interface{}) *EncryptedMessage {
-	msg := new(EncryptedMessage)
-	return msg.Init(msg, dict)
+	msg := new(EncryptedMessage).Init(dict)
+	ObjectRetain(msg)
+	return msg
 }
 
-func (msg *EncryptedMessage) Init(this SecureMessage, dict map[string]interface{}) *EncryptedMessage {
-	if msg.BaseMessage.Init(this, dict) != nil {
+func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage {
+	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
 		msg._data = nil
 		msg._key = nil
@@ -328,7 +329,7 @@ func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interf
 	} else {
 		sMsg = NewEncryptedMessage(msg)
 	}
-	sMsg.AutoRelease()
+	ObjectAutorelease(sMsg)
 	return sMsg
 }
 

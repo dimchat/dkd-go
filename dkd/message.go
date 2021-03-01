@@ -82,8 +82,8 @@ type BaseMessage struct {
 	_delegate MessageDelegate
 }
 
-func (msg *BaseMessage) Init(this Message, dict map[string]interface{}) *BaseMessage {
-	if msg.Dictionary.Init(this, dict) != nil {
+func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
+	if msg.Dictionary.Init(dict) != nil {
 		// lazy load
 		msg.setEnvelope(nil)
 		msg._delegate = nil

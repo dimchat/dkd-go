@@ -68,12 +68,13 @@ type RelayMessage struct {
 }
 
 func NewRelayMessage(dict map[string]interface{}) *RelayMessage {
-	msg := new(RelayMessage)
-	return msg.Init(msg, dict)
+	msg := new(RelayMessage).Init(dict)
+	ObjectRetain(msg)
+	return msg
 }
 
-func (msg *RelayMessage) Init(this ReliableMessage, dict map[string]interface{}) *RelayMessage {
-	if msg.EncryptedMessage.Init(this, dict) != nil {
+func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
+	if msg.EncryptedMessage.Init(dict) != nil {
 		// lazy load
 		msg._signature = nil
 
@@ -197,7 +198,7 @@ type RelayMessageFactory struct {
 
 func (factory *RelayMessageFactory) ParseSecureMessage(msg map[string]interface{}) ReliableMessage {
 	rMsg := NewRelayMessage(msg)
-	rMsg.AutoRelease()
+	ObjectAutorelease(rMsg)
 	return rMsg
 }
 

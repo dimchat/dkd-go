@@ -69,16 +69,17 @@ func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when time.T
 		dict["time"] = when.Unix()
 	}
 	env := new(MessageEnvelope)
-	if env.Init(env, dict) != nil {
+	if env.Init(dict) != nil {
 		env.setSender(from)
 		env.setReceiver(to)
 		env._time = when
 	}
+	ObjectRetain(env)
 	return env
 }
 
-func (env *MessageEnvelope) Init(this Envelope, dict map[string]interface{}) *MessageEnvelope {
-	if env.Dictionary.Init(this, dict) != nil {
+func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
+	if env.Dictionary.Init(dict) != nil {
 		// lazy load
 		env.setSender(nil)
 		env.setReceiver(nil)
@@ -178,13 +179,13 @@ type MessageEnvelopeFactory struct {
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
 	envelope := NewMessageEnvelope(nil, from, to, when)
-	envelope.AutoRelease()
+	ObjectAutorelease(envelope)
 	return envelope
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
 	envelope := NewMessageEnvelope(env, nil, nil, time.Time{})
-	envelope.AutoRelease()
+	ObjectAutorelease(envelope)
 	return envelope
 }
 
