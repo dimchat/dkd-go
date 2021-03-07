@@ -100,20 +100,20 @@ func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 	return content
 }
 
-func (content *BaseContent) Release() int {
-	cnt := content.Dictionary.Release()
-	if cnt == 0 {
-		// this object is going to be destroyed,
-		// release children
-		content.setGroup(nil)
-	}
-	return cnt
-}
+//func (content *BaseContent) Release() int {
+//	cnt := content.Dictionary.Release()
+//	if cnt == 0 {
+//		// this object is going to be destroyed,
+//		// release children
+//		content.setGroup(nil)
+//	}
+//	return cnt
+//}
 
 func (content *BaseContent) setGroup(group ID)  {
 	if group != content._group {
-		ObjectRetain(group)
-		ObjectRelease(content._group)
+		//ObjectRetain(group)
+		//ObjectRelease(content._group)
 		content._group = group
 	}
 }

@@ -88,29 +88,29 @@ func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
 	return env
 }
 
-func (env *MessageEnvelope) Release() int {
-	cnt := env.Dictionary.Release()
-	if cnt == 0 {
-		// this object is going to be destroyed,
-		// release children
-		env.setSender(nil)
-		env.setReceiver(nil)
-	}
-	return cnt
-}
+//func (env *MessageEnvelope) Release() int {
+//	cnt := env.Dictionary.Release()
+//	if cnt == 0 {
+//		// this object is going to be destroyed,
+//		// release children
+//		env.setSender(nil)
+//		env.setReceiver(nil)
+//	}
+//	return cnt
+//}
 
 func (env *MessageEnvelope) setSender(sender ID)  {
 	if sender != env._sender {
-		ObjectRetain(sender)
-		ObjectRelease(env._sender)
+		//ObjectRetain(sender)
+		//ObjectRelease(env._sender)
 		env._sender = sender
 	}
 }
 
 func (env *MessageEnvelope) setReceiver(receiver ID)  {
 	if receiver != env._receiver {
-		ObjectRetain(receiver)
-		ObjectRelease(env._receiver)
+		//ObjectRetain(receiver)
+		//ObjectRelease(env._receiver)
 		env._receiver = receiver
 	}
 }

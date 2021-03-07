@@ -91,20 +91,20 @@ func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
 	return msg
 }
 
-func (msg *BaseMessage) Release() int {
-	cnt := msg.Dictionary.Release()
-	if cnt == 0 {
-		// this object is going to be destroyed,
-		// release children
-		msg.setEnvelope(nil)
-	}
-	return cnt
-}
+//func (msg *BaseMessage) Release() int {
+//	cnt := msg.Dictionary.Release()
+//	if cnt == 0 {
+//		// this object is going to be destroyed,
+//		// release children
+//		msg.setEnvelope(nil)
+//	}
+//	return cnt
+//}
 
 func (msg *BaseMessage) setEnvelope(env Envelope)  {
 	if env != msg._env {
-		ObjectRetain(env)
-		ObjectRelease(msg._env)
+		//ObjectRetain(env)
+		//ObjectRelease(msg._env)
 		msg._env = env
 	}
 }

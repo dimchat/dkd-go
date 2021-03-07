@@ -80,20 +80,20 @@ func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
 	return msg
 }
 
-func (msg *PlainMessage) Release() int {
-	cnt := msg.BaseMessage.Release()
-	if cnt == 0 {
-		// this object is going to be destroyed,
-		// release children
-		msg.setContent(nil)
-	}
-	return cnt
-}
+//func (msg *PlainMessage) Release() int {
+//	cnt := msg.BaseMessage.Release()
+//	if cnt == 0 {
+//		// this object is going to be destroyed,
+//		// release children
+//		msg.setContent(nil)
+//	}
+//	return cnt
+//}
 
 func (msg *PlainMessage) setContent(content Content)  {
 	if content != msg._content {
-		ObjectRetain(content)
-		ObjectRelease(msg._content)
+		//ObjectRetain(content)
+		//ObjectRelease(msg._content)
 		msg._content = content
 	}
 }

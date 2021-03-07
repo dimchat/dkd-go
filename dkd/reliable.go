@@ -84,29 +84,29 @@ func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
 	return msg
 }
 
-func (msg *RelayMessage) Release() int {
-	cnt := msg.EncryptedMessage.Release()
-	if cnt == 0 {
-		// this object is going to be destroyed,
-		// release children
-		msg.setMeta(nil)
-		msg.setVisa(nil)
-	}
-	return cnt
-}
+//func (msg *RelayMessage) Release() int {
+//	cnt := msg.EncryptedMessage.Release()
+//	if cnt == 0 {
+//		// this object is going to be destroyed,
+//		// release children
+//		msg.setMeta(nil)
+//		msg.setVisa(nil)
+//	}
+//	return cnt
+//}
 
 func (msg *RelayMessage) setMeta(meta Meta)  {
 	if meta != msg._meta {
-		ObjectRetain(meta)
-		ObjectRelease(msg._meta)
+		//ObjectRetain(meta)
+		//ObjectRelease(msg._meta)
 		msg._meta = meta
 	}
 }
 
 func (msg *RelayMessage) setVisa(visa Visa)  {
 	if visa != msg._visa {
-		ObjectRetain(visa)
-		ObjectRelease(msg._visa)
+		//ObjectRetain(visa)
+		//ObjectRelease(msg._visa)
 		msg._visa = visa
 	}
 }
