@@ -73,7 +73,7 @@ func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 		content._type = 0
 		content._sn = 0
 		content._time = time.Time{}
-		content.setGroup(nil)
+		content._group = nil
 	}
 	return content
 }
@@ -95,27 +95,9 @@ func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 		content._type = msgType
 		content._sn = sn
 		content._time = now
-		content.setGroup(nil)
+		content._group = nil
 	}
 	return content
-}
-
-//func (content *BaseContent) Release() int {
-//	cnt := content.Dictionary.Release()
-//	if cnt == 0 {
-//		// this object is going to be destroyed,
-//		// release children
-//		content.setGroup(nil)
-//	}
-//	return cnt
-//}
-
-func (content *BaseContent) setGroup(group ID)  {
-	if group != content._group {
-		//ObjectRetain(group)
-		//ObjectRelease(content._group)
-		content._group = group
-	}
 }
 
 //-------- IContent
@@ -143,12 +125,12 @@ func (content *BaseContent) Time() time.Time {
 
 func (content *BaseContent) Group() ID {
 	if content._group == nil {
-		content.setGroup(ContentGetGroup(content.GetMap(false)))
+		content._group = ContentGetGroup(content.GetMap(false))
 	}
 	return content._group
 }
 
 func (content *BaseContent) SetGroup(group ID)  {
 	ContentSetGroup(content.GetMap(false), group)
-	content.setGroup(group)
+	content._group = group
 }

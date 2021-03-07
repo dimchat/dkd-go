@@ -194,12 +194,7 @@ type ContentFactory interface {
 var contentFactories = make(map[uint8]ContentFactory)
 
 func ContentRegister(msgType uint8, factory ContentFactory) {
-	old := contentFactories[msgType]
-	if old != factory {
-		ObjectRetain(factory)
-		ObjectRelease(old)
-		contentFactories[msgType] = factory
-	}
+	contentFactories[msgType] = factory
 }
 
 func ContentGetFactory(msgType uint8) ContentFactory {

@@ -33,7 +33,6 @@ package dkd
 import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
-	. "github.com/dimchat/mkm-go/types"
 )
 
 /**
@@ -68,9 +67,7 @@ type RelayMessage struct {
 }
 
 func NewRelayMessage(dict map[string]interface{}) *RelayMessage {
-	msg := new(RelayMessage).Init(dict)
-	ObjectRetain(msg)
-	return msg
+	return new(RelayMessage).Init(dict)
 }
 
 func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
@@ -78,37 +75,10 @@ func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
 		// lazy load
 		msg._signature = nil
 
-		msg.setMeta(nil)
-		msg.setVisa(nil)
+		msg._meta = nil
+		msg._visa = nil
 	}
 	return msg
-}
-
-//func (msg *RelayMessage) Release() int {
-//	cnt := msg.EncryptedMessage.Release()
-//	if cnt == 0 {
-//		// this object is going to be destroyed,
-//		// release children
-//		msg.setMeta(nil)
-//		msg.setVisa(nil)
-//	}
-//	return cnt
-//}
-
-func (msg *RelayMessage) setMeta(meta Meta)  {
-	if meta != msg._meta {
-		//ObjectRetain(meta)
-		//ObjectRelease(msg._meta)
-		msg._meta = meta
-	}
-}
-
-func (msg *RelayMessage) setVisa(visa Visa)  {
-	if visa != msg._visa {
-		//ObjectRetain(visa)
-		//ObjectRelease(msg._visa)
-		msg._visa = visa
-	}
 }
 
 //-------- IReliableMessage
@@ -124,26 +94,26 @@ func (msg *RelayMessage) Signature() []byte {
 
 func (msg *RelayMessage) Meta() Meta {
 	if msg._meta == nil {
-		msg.setMeta(ReliableMessageGetMeta(msg.GetMap(false)))
+		msg._meta = ReliableMessageGetMeta(msg.GetMap(false))
 	}
 	return msg._meta
 }
 
 func (msg *RelayMessage) SetMeta(meta Meta) {
 	ReliableMessageSetMeta(msg.GetMap(false), meta)
-	msg.setMeta(meta)
+	msg._meta = meta
 }
 
 func (msg *RelayMessage) Visa() Visa {
 	if msg._visa == nil {
-		msg.setVisa(ReliableMessageGetVisa(msg.GetMap(false)))
+		msg._visa = ReliableMessageGetVisa(msg.GetMap(false))
 	}
 	return msg._visa
 }
 
 func (msg *RelayMessage) SetVisa(visa Visa) {
 	ReliableMessageSetVisa(msg.GetMap(false), visa)
-	msg.setVisa(visa)
+	msg._visa = visa
 }
 
 /*
@@ -197,9 +167,7 @@ type RelayMessageFactory struct {
 }
 
 func (factory *RelayMessageFactory) ParseSecureMessage(msg map[string]interface{}) ReliableMessage {
-	rMsg := NewRelayMessage(msg)
-	ObjectAutorelease(rMsg)
-	return rMsg
+	return NewRelayMessage(msg)
 }
 
 func BuildReliableMessageFactory() ReliableMessageFactory {

@@ -64,9 +64,7 @@ type EncryptedMessage struct {
 }
 
 func NewEncryptedMessage(dict map[string]interface{}) *EncryptedMessage {
-	msg := new(EncryptedMessage).Init(dict)
-	ObjectRetain(msg)
-	return msg
+	return new(EncryptedMessage).Init(dict)
 }
 
 func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage {
@@ -322,15 +320,12 @@ type EncryptedMessageFactory struct {
 }
 
 func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
-	var sMsg SecureMessage
 	if _, exists := msg["signature"]; exists {
 		// this should be a reliable message
-		sMsg = NewRelayMessage(msg)
+		return NewRelayMessage(msg)
 	} else {
-		sMsg = NewEncryptedMessage(msg)
+		return NewEncryptedMessage(msg)
 	}
-	ObjectAutorelease(sMsg)
-	return sMsg
 }
 
 func BuildSecureMessageFactory() SecureMessageFactory {

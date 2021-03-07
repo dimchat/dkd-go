@@ -34,7 +34,6 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
-	. "github.com/dimchat/mkm-go/types"
 	"time"
 )
 
@@ -65,37 +64,18 @@ func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *
 	}
 	msg := new(PlainMessage)
 	if msg.BaseMessage.Init(dict) != nil {
-		msg.setEnvelope(head)
-		msg.setContent(body)
+		msg._env = head
+		msg._content = body
 	}
-	ObjectRetain(msg)
 	return msg
 }
 
 func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
 	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
-		msg.setContent(nil)
+		msg._content = nil
 	}
 	return msg
-}
-
-//func (msg *PlainMessage) Release() int {
-//	cnt := msg.BaseMessage.Release()
-//	if cnt == 0 {
-//		// this object is going to be destroyed,
-//		// release children
-//		msg.setContent(nil)
-//	}
-//	return cnt
-//}
-
-func (msg *PlainMessage) setContent(content Content)  {
-	if content != msg._content {
-		//ObjectRetain(content)
-		//ObjectRelease(msg._content)
-		msg._content = content
-	}
 }
 
 //-------- IMessage
@@ -120,7 +100,7 @@ func (msg *PlainMessage) Type() uint8 {
 
 func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {
-		msg.setContent(InstantMessageGetContent(msg.GetMap(false)))
+		msg._content = InstantMessageGetContent(msg.GetMap(false))
 	}
 	return msg._content
 }
@@ -215,15 +195,11 @@ type PlainMessageFactory struct {
 }
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
-	iMsg := NewPlainMessage(nil, head, body)
-	ObjectAutorelease(iMsg)
-	return iMsg
+	return NewPlainMessage(nil, head, body)
 }
 
 func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {
-	iMsg := NewPlainMessage(msg, nil, nil)
-	ObjectAutorelease(iMsg)
-	return iMsg
+	return NewPlainMessage(msg, nil, nil)
 }
 
 func BuildInstantMessageFactory() InstantMessageFactory {

@@ -70,63 +70,35 @@ func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when time.T
 	}
 	env := new(MessageEnvelope)
 	if env.Init(dict) != nil {
-		env.setSender(from)
-		env.setReceiver(to)
+		env._sender = from
+		env._receiver = to
 		env._time = when
 	}
-	ObjectRetain(env)
 	return env
 }
 
 func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
 	if env.Dictionary.Init(dict) != nil {
 		// lazy load
-		env.setSender(nil)
-		env.setReceiver(nil)
+		env._sender = nil
+		env._receiver = nil
 		env._time = time.Unix(0, 0)
 	}
 	return env
-}
-
-//func (env *MessageEnvelope) Release() int {
-//	cnt := env.Dictionary.Release()
-//	if cnt == 0 {
-//		// this object is going to be destroyed,
-//		// release children
-//		env.setSender(nil)
-//		env.setReceiver(nil)
-//	}
-//	return cnt
-//}
-
-func (env *MessageEnvelope) setSender(sender ID)  {
-	if sender != env._sender {
-		//ObjectRetain(sender)
-		//ObjectRelease(env._sender)
-		env._sender = sender
-	}
-}
-
-func (env *MessageEnvelope) setReceiver(receiver ID)  {
-	if receiver != env._receiver {
-		//ObjectRetain(receiver)
-		//ObjectRelease(env._receiver)
-		env._receiver = receiver
-	}
 }
 
 //-------- IEnvelope
 
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
-		env.setSender(EnvelopeGetSender(env.GetMap(false)))
+		env._sender = EnvelopeGetSender(env.GetMap(false))
 	}
 	return env._sender
 }
 
 func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
-		env.setReceiver(EnvelopeGetReceiver(env.GetMap(false)))
+		env._receiver = EnvelopeGetReceiver(env.GetMap(false))
 	}
 	return env._receiver
 }
@@ -178,15 +150,11 @@ type MessageEnvelopeFactory struct {
 }
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
-	envelope := NewMessageEnvelope(nil, from, to, when)
-	ObjectAutorelease(envelope)
-	return envelope
+	return NewMessageEnvelope(nil, from, to, when)
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
-	envelope := NewMessageEnvelope(env, nil, nil, time.Time{})
-	ObjectAutorelease(envelope)
-	return envelope
+	return NewMessageEnvelope(env, nil, nil, time.Time{})
 }
 
 func BuildEnvelopeFactory() EnvelopeFactory {

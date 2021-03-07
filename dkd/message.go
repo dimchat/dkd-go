@@ -85,28 +85,10 @@ type BaseMessage struct {
 func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
 	if msg.Dictionary.Init(dict) != nil {
 		// lazy load
-		msg.setEnvelope(nil)
+		msg._env = nil
 		msg._delegate = nil
 	}
 	return msg
-}
-
-//func (msg *BaseMessage) Release() int {
-//	cnt := msg.Dictionary.Release()
-//	if cnt == 0 {
-//		// this object is going to be destroyed,
-//		// release children
-//		msg.setEnvelope(nil)
-//	}
-//	return cnt
-//}
-
-func (msg *BaseMessage) setEnvelope(env Envelope)  {
-	if env != msg._env {
-		//ObjectRetain(env)
-		//ObjectRelease(msg._env)
-		msg._env = env
-	}
 }
 
 //-------- IMessage
@@ -121,7 +103,7 @@ func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
 
 func (msg *BaseMessage) Envelope() Envelope {
 	if msg._env == nil {
-		msg.setEnvelope(MessageGetEnvelope(msg.GetMap(false)))
+		msg._env = MessageGetEnvelope(msg.GetMap(false))
 	}
 	return msg._env
 }

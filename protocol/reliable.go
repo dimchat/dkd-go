@@ -157,11 +157,7 @@ type ReliableMessageFactory interface {
 var reliableFactory ReliableMessageFactory = nil
 
 func ReliableMessageSetFactory(factory ReliableMessageFactory) {
-	if factory != reliableFactory {
-		ObjectRetain(factory)
-		ObjectRelease(reliableFactory)
-		reliableFactory = factory
-	}
+	reliableFactory = factory
 }
 
 func ReliableMessageGetFactory() ReliableMessageFactory {
