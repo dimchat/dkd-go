@@ -156,7 +156,7 @@ func SecureMessageGetFactory() SecureMessageFactory {
 //  Factory method
 //
 func SecureMessageParse(msg interface{}) SecureMessage {
-	if msg == nil {
+	if ValueIsNil(msg) {
 		return nil
 	}
 	value, ok := msg.(SecureMessage)

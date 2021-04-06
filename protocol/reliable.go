@@ -111,7 +111,7 @@ func ReliableMessageGetMeta(msg map[string]interface{}) Meta {
 }
 
 func ReliableMessageSetMeta(msg map[string]interface{}, meta Meta) {
-	if meta == nil {
+	if ValueIsNil(meta) {
 		delete(msg, "meta")
 	} else {
 		msg["meta"] = meta.GetMap(false)
@@ -131,7 +131,7 @@ func ReliableMessageGetVisa(msg map[string]interface{}) Visa {
 }
 
 func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
-	if visa == nil {
+	if ValueIsNil(visa) {
 		delete(msg, "visa")
 		delete(msg, "profile")
 	} else {
@@ -168,7 +168,7 @@ func ReliableMessageGetFactory() ReliableMessageFactory {
 //  Factory method
 //
 func ReliableMessageParse(msg interface{}) ReliableMessage {
-	if msg == nil {
+	if ValueIsNil(msg) {
 		return nil
 	}
 	value, ok := msg.(ReliableMessage)

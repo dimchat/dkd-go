@@ -112,7 +112,7 @@ func EnvelopeGetGroup(env map[string]interface{}) ID {
 }
 
 func EnvelopeSetGroup(env map[string]interface{}, group ID) {
-	if group == nil {
+	if ValueIsNil(group) {
 		delete(env, "group")
 	} else {
 		env["group"] = group.String()
@@ -179,7 +179,7 @@ func EnvelopeCreate(from ID, to ID, when time.Time) Envelope {
 }
 
 func EnvelopeParse(env interface{}) Envelope {
-	if env == nil {
+	if ValueIsNil(env) {
 		return nil
 	}
 	value, ok := env.(Envelope)

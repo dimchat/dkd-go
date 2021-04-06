@@ -34,6 +34,7 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
+	. "github.com/dimchat/mkm-go/types"
 	"time"
 )
 
@@ -58,7 +59,7 @@ type PlainMessage struct {
 }
 
 func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *PlainMessage {
-	if dict == nil {
+	if ValueIsNil(dict) {
 		dict = head.GetMap(false)
 		dict["content"] = body.GetMap(false)
 	}
@@ -148,7 +149,7 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
 		return SecureMessageParse(info)
 	}
 	// 2.2. encrypt symmetric key(s)
-	if members == nil {
+	if ValueIsNil(members) {
 		// personal message
 		key = delegate.EncryptKey(key, msg.Receiver(), msg)
 		if key == nil {

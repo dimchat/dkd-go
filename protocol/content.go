@@ -169,7 +169,7 @@ func ContentGetGroup(content map[string]interface{}) ID {
 }
 
 func ContentSetGroup(content map[string]interface{}, group ID) {
-	if group == nil {
+	if ValueIsNil(group) {
 		delete(content, "group")
 	} else {
 		content["group"] = group.String()
@@ -205,7 +205,7 @@ func ContentGetFactory(msgType uint8) ContentFactory {
 //  Factory method
 //
 func ContentParse(content interface{}) Content {
-	if content == nil {
+	if ValueIsNil(content) {
 		return nil
 	}
 	value, ok := content.(Content)

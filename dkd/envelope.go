@@ -59,7 +59,7 @@ type MessageEnvelope struct {
 }
 
 func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when time.Time) *MessageEnvelope {
-	if dict == nil {
+	if ValueIsNil(dict) {
 		if when.IsZero() {
 			when = time.Now()
 		}

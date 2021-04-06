@@ -126,7 +126,7 @@ func InstantMessageCreate(head Envelope, body Content) InstantMessage {
 }
 
 func InstantMessageParse(msg interface{}) InstantMessage {
-	if msg == nil {
+	if ValueIsNil(msg) {
 		return nil
 	}
 	value, ok := msg.(InstantMessage)
