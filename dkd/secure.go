@@ -81,17 +81,16 @@ func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage
 
 func (msg *EncryptedMessage) EncryptedData() []byte {
 	if msg._data == nil {
-		base64 := msg.Get("data")
-		delegate := msg.Delegate()
-		msg._data = delegate.DecodeData(base64.(string), msg)
+		base64, _ := msg.Get("data").(string)
+		msg._data = msg.Delegate().DecodeData(base64, msg)
 	}
 	return msg._data
 }
 
 func (msg *EncryptedMessage) EncryptedKey() []byte {
 	if msg._key == nil {
-		base64 := msg.Get("key")
-		if base64 == nil {
+		base64, ok := msg.Get("key").(string)
+		if !ok {
 			// check 'keys'
 			keys := msg.EncryptedKeys()
 			if keys != nil {
@@ -99,9 +98,8 @@ func (msg *EncryptedMessage) EncryptedKey() []byte {
 				base64 = keys[receiver.String()]
 			}
 		}
-		if base64 != nil {
-			delegate := msg.Delegate()
-			msg._key = delegate.DecodeKey(base64.(string), msg)
+		if base64 != "" {
+			msg._key = msg.Delegate().DecodeKey(base64, msg)
 		}
 	}
 	return msg._key
@@ -109,9 +107,9 @@ func (msg *EncryptedMessage) EncryptedKey() []byte {
 
 func (msg *EncryptedMessage) EncryptedKeys() map[string]string {
 	if msg._keys == nil {
-		keys := msg.Get("keys")
-		if keys != nil {
-			msg._keys = keys.(map[string]string)
+		keys, ok := msg.Get("keys").(map[string]string)
+		if ok {
+			msg._keys = keys
 		}
 	}
 	return msg._keys

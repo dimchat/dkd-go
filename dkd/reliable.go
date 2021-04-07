@@ -85,9 +85,8 @@ func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
 
 func (msg *RelayMessage) Signature() []byte {
 	if msg._signature == nil {
-		base64 := msg.Get("signature")
-		delegate := msg.Delegate()
-		msg._signature = delegate.DecodeSignature(base64.(string), msg)
+		base64, _ := msg.Get("signature").(string)
+		msg._signature = msg.Delegate().DecodeSignature(base64, msg)
 	}
 	return msg._signature
 }
@@ -146,8 +145,7 @@ func (msg *RelayMessage) Verify() SecureMessage {
 	}
 	sender := msg.Sender()
 	// 1. verify data signature with sender's public key
-	delegate := msg.Delegate()
-	if delegate.VerifyDataSignature(data, signature, sender, msg) {
+	if msg.Delegate().VerifyDataSignature(data, signature, sender, msg) {
 		// 2. pack message
 		info := msg.GetMap(true)
 		delete(info, "signature")

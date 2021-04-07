@@ -127,7 +127,12 @@ func ReliableMessageGetVisa(msg map[string]interface{}) Visa {
 			return nil
 		}
 	}
-	return doc.(Visa)
+	visa, ok := doc.(Visa)
+	if ok {
+		return visa
+	} else {
+		return nil
+	}
 }
 
 func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {

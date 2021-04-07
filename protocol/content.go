@@ -147,21 +147,30 @@ type IContent interface {
 }
 
 func ContentGetType(content map[string]interface{}) uint8 {
-	msgType := content["type"]
-	return msgType.(uint8)
+	msgType, ok := content["type"].(uint8)
+	if ok {
+		return msgType
+	} else {
+		return 0
+	}
 }
 
 func ContentGetSN(content map[string]interface{}) uint32 {
-	sn := content["sn"]
-	return sn.(uint32)
+	sn, ok := content["sn"].(uint32)
+	if ok {
+		return sn
+	} else {
+		return 0
+	}
 }
 
 func ContentGetTime(content map[string]interface{}) time.Time {
-	timestamp := content["time"]
-	if timestamp == nil {
+	timestamp, ok := content["time"].(int64)
+	if ok {
+		return time.Unix(timestamp, 0)
+	} else {
 		return time.Time{}
 	}
-	return time.Unix(timestamp.(int64), 0)
 }
 
 func ContentGetGroup(content map[string]interface{}) ID {

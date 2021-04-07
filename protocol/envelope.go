@@ -100,11 +100,12 @@ func EnvelopeGetReceiver(env map[string]interface{}) ID {
 }
 
 func EnvelopeGetTime(env map[string]interface{}) time.Time {
-	timestamp := env["time"]
-	if timestamp == nil {
+	timestamp, ok := env["time"].(int64)
+	if ok {
+		return time.Unix(timestamp, 0)
+	} else {
 		return time.Time{}
 	}
-	return time.Unix(timestamp.(int64), 0)
 }
 
 func EnvelopeGetGroup(env map[string]interface{}) ID {
@@ -120,11 +121,12 @@ func EnvelopeSetGroup(env map[string]interface{}, group ID) {
 }
 
 func EnvelopeGetType(env map[string]interface{}) uint8 {
-	msgType := env["type"]
-	if msgType == nil {
+	msgType, ok := env["type"].(uint8)
+	if ok {
+		return msgType
+	} else {
 		return 0
 	}
-	return msgType.(uint8)
 }
 
 func EnvelopeSetType(env map[string]interface{}, msgType uint8) {
