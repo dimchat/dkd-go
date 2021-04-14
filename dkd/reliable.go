@@ -164,8 +164,15 @@ type RelayMessageFactory struct {
 	ReliableMessageFactory
 }
 
-func (factory *RelayMessageFactory) ParseSecureMessage(msg map[string]interface{}) ReliableMessage {
-	return NewRelayMessage(msg)
+func (factory *RelayMessageFactory) ParseReliableMessage(msg map[string]interface{}) ReliableMessage {
+	// msg.sender should not empty
+	// msg.data should not empty
+	// msg.signature should not empty
+	if msg["sender"] == nil || msg["data"] == nil || msg["signature"] == nil {
+		return nil
+	} else {
+		return NewRelayMessage(msg)
+	}
 }
 
 func BuildReliableMessageFactory() ReliableMessageFactory {

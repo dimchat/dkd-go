@@ -98,7 +98,12 @@ func (env *MessageEnvelope) Sender() ID {
 
 func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
-		env._receiver = EnvelopeGetReceiver(env.GetMap(false))
+		receiver := EnvelopeGetReceiver(env.GetMap(false))
+		if receiver == nil {
+			env._receiver = ANYONE
+		} else {
+			env._receiver = receiver
+		}
 	}
 	return env._receiver
 }
@@ -154,7 +159,12 @@ func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
-	return NewMessageEnvelope(env, nil, nil, time.Time{})
+	if env["sender"] == nil {
+		// env.sender should not empty
+		return nil
+	} else {
+		return NewMessageEnvelope(env, nil, nil, time.Time{})
+	}
 }
 
 func BuildEnvelopeFactory() EnvelopeFactory {
