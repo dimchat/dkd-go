@@ -85,7 +85,7 @@ func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
 
 func (msg *RelayMessage) Signature() []byte {
 	if msg._signature == nil {
-		base64, _ := msg.Get("signature").(string)
+		base64 := msg.Get("signature")
 		msg._signature = msg.Delegate().DecodeSignature(base64, msg)
 	}
 	return msg._signature

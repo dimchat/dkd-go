@@ -50,8 +50,8 @@ import (
  *  }
  */
 type InstantMessage interface {
-	Message
 	IInstantMessage
+	Message
 }
 type IInstantMessage interface {
 
@@ -74,6 +74,7 @@ type IInstantMessage interface {
 	 *  Encrypt message, replace 'content' field with encrypted 'data'
 	 *
 	 * @param password - symmetric key
+	 * @param members  - group members; nil for personal message
 	 * @return SecureMessage object
 	 */
 	Encrypt(password SymmetricKey, members []ID) SecureMessage
@@ -88,6 +89,9 @@ func InstantMessageGetContent(msg map[string]interface{}) Content {
  *  ~~~~~~~~~~~~~~~
  */
 type InstantMessageFactory interface {
+	IInstantMessageFactory
+}
+type IInstantMessageFactory interface {
 
 	/**
 	 *  Create instant message with envelope & content
@@ -122,6 +126,9 @@ func InstantMessageGetFactory() InstantMessageFactory {
 //
 func InstantMessageCreate(head Envelope, body Content) InstantMessage {
 	factory := InstantMessageGetFactory()
+	if factory == nil {
+		panic("instant message factory not found")
+	}
 	return factory.CreateInstantMessage(head, body)
 }
 
@@ -147,5 +154,8 @@ func InstantMessageParse(msg interface{}) InstantMessage {
 	}
 	// create by message factory
 	factory := InstantMessageGetFactory()
+	if factory == nil {
+		panic("instant message factory not found")
+	}
 	return factory.ParseInstantMessage(info)
 }

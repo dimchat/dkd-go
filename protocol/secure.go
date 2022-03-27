@@ -54,8 +54,8 @@ import (
  *  }
  */
 type SecureMessage interface {
-	Message
 	ISecureMessage
+	Message
 }
 type ISecureMessage interface {
 
@@ -132,6 +132,9 @@ type ISecureMessage interface {
  *  ~~~~~~~~~~~~~~~
  */
 type SecureMessageFactory interface {
+	ISecureMessageFactory
+}
+type ISecureMessageFactory interface {
 
 	/**
 	 *  Parse map object to message
@@ -177,5 +180,8 @@ func SecureMessageParse(msg interface{}) SecureMessage {
 	}
 	// create by message factory
 	factory := SecureMessageGetFactory()
+	if factory == nil {
+		panic("secure message factory not found")
+	}
 	return factory.ParseSecureMessage(info)
 }

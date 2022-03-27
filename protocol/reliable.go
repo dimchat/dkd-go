@@ -57,8 +57,8 @@ import (
  *  }
  */
 type ReliableMessage interface {
-	SecureMessage
 	IReliableMessage
+	SecureMessage
 }
 type IReliableMessage interface {
 
@@ -120,13 +120,6 @@ func ReliableMessageSetMeta(msg map[string]interface{}, meta Meta) {
 
 func ReliableMessageGetVisa(msg map[string]interface{}) Visa {
 	doc := DocumentParse(msg["visa"])
-	if doc == nil {
-		// compatible with v1.0
-		doc = DocumentParse(msg["profile"])
-		if doc == nil {
-			return nil
-		}
-	}
 	visa, ok := doc.(Visa)
 	if ok {
 		return visa
@@ -138,7 +131,6 @@ func ReliableMessageGetVisa(msg map[string]interface{}) Visa {
 func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
 	if ValueIsNil(visa) {
 		delete(msg, "visa")
-		delete(msg, "profile")
 	} else {
 		msg["visa"] = visa.GetMap(false)
 	}
@@ -149,6 +141,9 @@ func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
  *  ~~~~~~~~~~~~~~~
  */
 type ReliableMessageFactory interface {
+	IReliableMessageFactory
+}
+type IReliableMessageFactory interface {
 
 	/**
 	 *  Parse map object to message
@@ -194,5 +189,8 @@ func ReliableMessageParse(msg interface{}) ReliableMessage {
 	}
 	// create by message factory
 	factory := ReliableMessageGetFactory()
+	if factory == nil {
+		panic("reliable message factory not found")
+	}
 	return factory.ParseReliableMessage(info)
 }

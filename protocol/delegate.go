@@ -49,6 +49,9 @@ type MessageDelegate interface {
  *  ~~~~~~~~~~~~~~~~~~~~~~~~
  */
 type InstantMessageDelegate interface {
+	IInstantMessageDelegate
+}
+type IInstantMessageDelegate interface {
 
 	//
 	//  Encrypt Content
@@ -121,6 +124,9 @@ type InstantMessageDelegate interface {
  *  ~~~~~~~~~~~~~~~~~~~~~~~
  */
 type SecureMessageDelegate interface {
+	ISecureMessageDelegate
+}
+type ISecureMessageDelegate interface {
 
 	//
 	//  Decrypt Key
@@ -133,7 +139,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return encrypted symmetric key data
 	 */
-	DecodeKey(key string, sMsg SecureMessage) []byte
+	DecodeKey(key interface{}, sMsg SecureMessage) []byte
 
 	/**
 	 *  2. Decrypt 'message.key' with receiver's private key
@@ -168,7 +174,7 @@ type SecureMessageDelegate interface {
 	 * @param sMsg - secure message object
 	 * @return encrypted content data
 	 */
-	DecodeData(data string, sMsg SecureMessage) []byte
+	DecodeData(data interface{}, sMsg SecureMessage) []byte
 
 	/**
 	 *  5. Decrypt 'message.data' with symmetric key
@@ -219,7 +225,10 @@ type SecureMessageDelegate interface {
  *  ~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 type ReliableMessageDelegate interface {
+	IReliableMessageDelegate
 	SecureMessageDelegate
+}
+type IReliableMessageDelegate interface {
 
 	/**
 	 *  1. Decode 'message.signature' from String (Base64)
@@ -228,7 +237,7 @@ type ReliableMessageDelegate interface {
 	 * @param rMsg - reliable message
 	 * @return signature data
 	 */
-	DecodeSignature(signature string, rMsg ReliableMessage) []byte
+	DecodeSignature(signature interface{}, rMsg ReliableMessage) []byte
 
 	/**
 	 *  2. Verify the message data and signature with sender's public key

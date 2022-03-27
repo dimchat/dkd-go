@@ -49,8 +49,8 @@ import (
  *  }
  */
 type Envelope interface {
-	Map
 	IEnvelope
+	Map
 }
 type IEnvelope interface {
 
@@ -142,6 +142,9 @@ func EnvelopeSetType(env map[string]interface{}, msgType uint8) {
  *  ~~~~~~~~~~~~~~~~
  */
 type EnvelopeFactory interface {
+	IEnvelopeFactory
+}
+type IEnvelopeFactory interface {
 
 	/**
 	 *  Create envelope
@@ -177,6 +180,9 @@ func EnvelopeGetFactory() EnvelopeFactory {
 //
 func EnvelopeCreate(from ID, to ID, when time.Time) Envelope {
 	factory := EnvelopeGetFactory()
+	if factory == nil {
+		panic("envelope factory not found")
+	}
 	return factory.CreateEnvelope(from, to, when)
 }
 
@@ -202,5 +208,8 @@ func EnvelopeParse(env interface{}) Envelope {
 	}
 	// create by envelope factory
 	factory := EnvelopeGetFactory()
+	if factory == nil {
+		panic("envelope factory not found")
+	}
 	return factory.ParseEnvelope(info)
 }

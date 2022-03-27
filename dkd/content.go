@@ -59,11 +59,14 @@ type BaseContent struct {
 	Dictionary
 	IContent
 
+	// message type: text, image, ...
 	_type uint8
+
+	// serial number: random number to identify message content
 	_sn uint32
 
+	// message time
 	_time time.Time
-	_group ID
 }
 
 /* designated initializer */
@@ -73,7 +76,6 @@ func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 		content._type = 0
 		content._sn = 0
 		content._time = time.Time{}
-		content._group = nil
 	}
 	return content
 }
@@ -95,7 +97,6 @@ func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 		content._type = msgType
 		content._sn = sn
 		content._time = now
-		content._group = nil
 	}
 	return content
 }
@@ -124,13 +125,9 @@ func (content *BaseContent) Time() time.Time {
 }
 
 func (content *BaseContent) Group() ID {
-	if content._group == nil {
-		content._group = ContentGetGroup(content.GetMap(false))
-	}
-	return content._group
+	return ContentGetGroup(content.GetMap(false))
 }
 
 func (content *BaseContent) SetGroup(group ID)  {
 	ContentSetGroup(content.GetMap(false), group)
-	content._group = group
 }
