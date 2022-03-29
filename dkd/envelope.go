@@ -151,8 +151,10 @@ func (env *MessageEnvelope) SetType(msgType uint8)  {
  *  ~~~~~~~~~~~~~~~
  */
 type MessageEnvelopeFactory struct {
-	EnvelopeFactory
+	IEnvelopeFactory
 }
+
+//-------- IEnvelopeFactory
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
 	return NewMessageEnvelope(nil, from, to, when)

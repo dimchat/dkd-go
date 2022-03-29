@@ -192,8 +192,10 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
  *  ~~~~~~~~~~~~~~~
  */
 type PlainMessageFactory struct {
-	InstantMessageFactory
+	IInstantMessageFactory
 }
+
+//-------- IInstantMessageFactory
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
 	return NewPlainMessage(nil, head, body)

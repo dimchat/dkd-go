@@ -314,8 +314,10 @@ func (msg *EncryptedMessage) Trim(member ID) SecureMessage {
  *  ~~~~~~~~~~~~~~~
  */
 type EncryptedMessageFactory struct {
-	SecureMessageFactory
+	ISecureMessageFactory
 }
+
+//-------- ISecureMessageFactory
 
 func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
 	if _, exists := msg["signature"]; exists {

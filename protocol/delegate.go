@@ -40,8 +40,12 @@ import (
  *  ~~~~~~~~~~~~~~~~
  */
 type MessageDelegate interface {
-	InstantMessageDelegate
-	ReliableMessageDelegate
+	IMessageDelegate
+}
+type IMessageDelegate interface {
+	IInstantMessageDelegate
+	ISecureMessageDelegate
+	IReliableMessageDelegate
 }
 
 /**

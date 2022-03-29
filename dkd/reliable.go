@@ -161,8 +161,10 @@ func (msg *RelayMessage) Verify() SecureMessage {
  *  ~~~~~~~~~~~~~~~
  */
 type RelayMessageFactory struct {
-	ReliableMessageFactory
+	IReliableMessageFactory
 }
+
+//-------- IReliableMessageFactory
 
 func (factory *RelayMessageFactory) ParseReliableMessage(msg map[string]interface{}) ReliableMessage {
 	// msg.sender should not empty
