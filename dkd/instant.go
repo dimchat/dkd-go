@@ -53,7 +53,6 @@ import (
  */
 type PlainMessage struct {
 	BaseMessage
-	IInstantMessage
 
 	_content Content
 }
@@ -191,9 +190,7 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
  *  General Factory
  *  ~~~~~~~~~~~~~~~
  */
-type PlainMessageFactory struct {
-	IInstantMessageFactory
-}
+type PlainMessageFactory struct {}
 
 //-------- IInstantMessageFactory
 

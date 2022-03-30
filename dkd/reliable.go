@@ -58,7 +58,6 @@ import (
  */
 type RelayMessage struct {
 	EncryptedMessage
-	IReliableMessage
 
 	_signature []byte
 
@@ -160,9 +159,7 @@ func (msg *RelayMessage) Verify() SecureMessage {
  *  General Factory
  *  ~~~~~~~~~~~~~~~
  */
-type RelayMessageFactory struct {
-	IReliableMessageFactory
-}
+type RelayMessageFactory struct {}
 
 //-------- IReliableMessageFactory
 

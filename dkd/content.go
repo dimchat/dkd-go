@@ -57,7 +57,6 @@ import (
  */
 type BaseContent struct {
 	Dictionary
-	IContent
 
 	// message type: text, image, ...
 	_type uint8

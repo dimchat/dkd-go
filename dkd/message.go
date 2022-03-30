@@ -75,7 +75,6 @@ import (
  */
 type BaseMessage struct {
 	Dictionary
-	IMessage
 
 	_env Envelope
 

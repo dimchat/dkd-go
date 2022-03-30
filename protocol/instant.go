@@ -50,10 +50,7 @@ import (
  *  }
  */
 type InstantMessage interface {
-	IInstantMessage
 	Message
-}
-type IInstantMessage interface {
 
 	Content() Content
 
@@ -89,9 +86,6 @@ func InstantMessageGetContent(msg map[string]interface{}) Content {
  *  ~~~~~~~~~~~~~~~
  */
 type InstantMessageFactory interface {
-	IInstantMessageFactory
-}
-type IInstantMessageFactory interface {
 
 	/**
 	 *  Create instant message with envelope & content
@@ -111,6 +105,9 @@ type IInstantMessageFactory interface {
 	ParseInstantMessage(msg map[string]interface{}) InstantMessage
 }
 
+//
+//  Instance of InstantMessageFactory
+//
 var instantFactory InstantMessageFactory = nil
 
 func InstantMessageSetFactory(factory InstantMessageFactory) {

@@ -56,7 +56,6 @@ import (
  */
 type EncryptedMessage struct {
 	BaseMessage
-	ISecureMessage
 
 	_data []byte
 	_key []byte
@@ -313,9 +312,7 @@ func (msg *EncryptedMessage) Trim(member ID) SecureMessage {
  *  General Factory
  *  ~~~~~~~~~~~~~~~
  */
-type EncryptedMessageFactory struct {
-	ISecureMessageFactory
-}
+type EncryptedMessageFactory struct {}
 
 //-------- ISecureMessageFactory
 

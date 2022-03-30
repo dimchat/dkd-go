@@ -57,10 +57,7 @@ import (
  *  }
  */
 type ReliableMessage interface {
-	IReliableMessage
 	SecureMessage
-}
-type IReliableMessage interface {
 
 	Signature() []byte
 
@@ -141,9 +138,6 @@ func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
  *  ~~~~~~~~~~~~~~~
  */
 type ReliableMessageFactory interface {
-	IReliableMessageFactory
-}
-type IReliableMessageFactory interface {
 
 	/**
 	 *  Parse map object to message
@@ -154,6 +148,9 @@ type IReliableMessageFactory interface {
 	ParseReliableMessage(msg map[string]interface{}) ReliableMessage
 }
 
+//
+//  Instance of ReliableMessageFactory
+//
 var reliableFactory ReliableMessageFactory = nil
 
 func ReliableMessageSetFactory(factory ReliableMessageFactory) {

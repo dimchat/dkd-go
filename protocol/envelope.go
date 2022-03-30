@@ -49,10 +49,7 @@ import (
  *  }
  */
 type Envelope interface {
-	IEnvelope
 	Map
-}
-type IEnvelope interface {
 
 	/**
 	 * Get message sender
@@ -142,9 +139,6 @@ func EnvelopeSetType(env map[string]interface{}, msgType uint8) {
  *  ~~~~~~~~~~~~~~~~
  */
 type EnvelopeFactory interface {
-	IEnvelopeFactory
-}
-type IEnvelopeFactory interface {
 
 	/**
 	 *  Create envelope
@@ -165,6 +159,9 @@ type IEnvelopeFactory interface {
 	ParseEnvelope(env map[string]interface{}) Envelope
 }
 
+//
+//  Instance of EnvelopeFactory
+//
 var envelopeFactory EnvelopeFactory = nil
 
 func EnvelopeSetFactory(factory EnvelopeFactory) {

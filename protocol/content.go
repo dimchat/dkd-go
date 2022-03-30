@@ -54,10 +54,7 @@ import (
  *  }
  */
 type Content interface {
-	IContent
 	Map
-}
-type IContent interface {
 
 	Type() uint8      // message type
 	SN() uint32       // serial number as message id
@@ -114,9 +111,6 @@ func ContentSetGroup(content map[string]interface{}, group ID) {
  *  ~~~~~~~~~~~~~~~
  */
 type ContentFactory interface {
-	IContentFactory
-}
-type IContentFactory interface {
 
 	/**
 	 *  Parse map object to content
@@ -127,6 +121,9 @@ type IContentFactory interface {
 	ParseContent(content map[string]interface{}) Content
 }
 
+//
+//  Instances of ContentFactory
+//
 var contentFactories = make(map[uint8]ContentFactory)
 
 func ContentSetFactory(msgType uint8, factory ContentFactory) {

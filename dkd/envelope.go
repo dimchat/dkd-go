@@ -51,7 +51,6 @@ import (
  */
 type MessageEnvelope struct {
 	Dictionary
-	IEnvelope
 
 	_sender ID
 	_receiver ID
@@ -150,9 +149,7 @@ func (env *MessageEnvelope) SetType(msgType uint8)  {
  *  General Factory
  *  ~~~~~~~~~~~~~~~
  */
-type MessageEnvelopeFactory struct {
-	IEnvelopeFactory
-}
+type MessageEnvelopeFactory struct {}
 
 //-------- IEnvelopeFactory
 

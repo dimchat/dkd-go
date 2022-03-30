@@ -54,10 +54,7 @@ import (
  *  }
  */
 type SecureMessage interface {
-	ISecureMessage
 	Message
-}
-type ISecureMessage interface {
 
 	EncryptedData() []byte
 	EncryptedKey() []byte
@@ -132,9 +129,6 @@ type ISecureMessage interface {
  *  ~~~~~~~~~~~~~~~
  */
 type SecureMessageFactory interface {
-	ISecureMessageFactory
-}
-type ISecureMessageFactory interface {
 
 	/**
 	 *  Parse map object to message
@@ -145,6 +139,9 @@ type ISecureMessageFactory interface {
 	ParseSecureMessage(msg map[string]interface{}) SecureMessage
 }
 
+//
+//  Instance of SecureMessageFactory
+//
 var secureFactory SecureMessageFactory = nil
 
 func SecureMessageSetFactory(factory SecureMessageFactory) {
