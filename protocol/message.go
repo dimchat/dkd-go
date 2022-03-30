@@ -100,7 +100,7 @@ func MessageGetEnvelope(msg map[string]interface{}) Envelope {
  */
 type MessageDelegate interface {
 	InstantMessageDelegate
-	SecureMessageDelegate
+	//SecureMessageDelegate
 	ReliableMessageDelegate
 }
 
