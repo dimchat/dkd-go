@@ -86,7 +86,7 @@ type Message interface {
 	Time() Time
 
 	Group() ID
-	Type() uint8
+	Type() ContentType
 }
 
 func MessageGetEnvelope(msg map[string]interface{}) Envelope {

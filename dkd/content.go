@@ -58,7 +58,7 @@ type BaseContent struct {
 	Dictionary
 
 	// message type: text, image, ...
-	_type uint8
+	_type ContentType
 
 	// serial number: random number to identify message content
 	_sn uint32
@@ -79,18 +79,17 @@ func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 }
 
 /* designated initializer */
-func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
+func (content *BaseContent) InitWithType(msgType ContentType) *BaseContent {
 	// message time
 	now := TimeNow()
-	stamp := UnixTime(now)
 	// serial number
-	rand.Seed(stamp)
+	rand.Seed(UnixTime(now))
 	sn := rand.Uint32()
 	// build content info
 	dict := make(map[string]interface{})
 	dict["type"] = msgType
 	dict["sn"] = sn
-	dict["time"] = stamp
+	dict["time"] = TimeToFloat64(now)
 	if content.Dictionary.Init(dict) != nil {
 		content._type = msgType
 		content._sn = sn
@@ -101,7 +100,7 @@ func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 
 //-------- IContent
 
-func (content *BaseContent) Type() uint8 {
+func (content *BaseContent) Type() ContentType {
 	if content._type == 0 {
 		content._type = ContentGetType(content.GetMap(false))
 	}

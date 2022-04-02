@@ -64,7 +64,7 @@ func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when Time) 
 		dict = make(map[string]interface{})
 		dict["sender"] = from.String()
 		dict["receiver"] = to.String()
-		dict["time"] = when.Unix()
+		dict["time"] = TimeToFloat64(when)
 	}
 	env := new(MessageEnvelope)
 	if env.Init(dict) != nil {
@@ -136,11 +136,11 @@ func (env *MessageEnvelope) SetGroup(group ID)  {
  *  we pick out the content type and set it in envelope
  *  to let the station do its job.
  */
-func (env *MessageEnvelope) Type() uint8 {
+func (env *MessageEnvelope) Type() ContentType {
 	return EnvelopeGetType(env.GetMap(false))
 }
 
-func (env *MessageEnvelope) SetType(msgType uint8)  {
+func (env *MessageEnvelope) SetType(msgType ContentType)  {
 	EnvelopeSetType(env.GetMap(false), msgType)
 }
 

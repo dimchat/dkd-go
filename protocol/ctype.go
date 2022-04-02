@@ -85,79 +85,76 @@ import (
 type ContentType uint8
 
 const (
-	TEXT          = 0x01 // 0000 0001
+	TEXT          ContentType = 0x01 // 0000 0001
 
-	FILE          = 0x10 // 0001 0000
-	IMAGE         = 0x12 // 0001 0010
-	AUDIO         = 0x14 // 0001 0100
-	VIDEO         = 0x16 // 0001 0110
+	FILE          ContentType = 0x10 // 0001 0000
+	IMAGE         ContentType = 0x12 // 0001 0010
+	AUDIO         ContentType = 0x14 // 0001 0100
+	VIDEO         ContentType = 0x16 // 0001 0110
 
 	// web page
-	PAGE          = 0x20 // 0010 0000
+	PAGE          ContentType = 0x20 // 0010 0000
 
 	// quote a message before and reply it with text
-	QUOTE         = 0x37 // 0011 0111
+	QUOTE         ContentType = 0x37 // 0011 0111
 
-	MONEY         = 0x40 // 0100 0000
-	TRANSFER      = 0x41 // 0100 0001
-	LUCKY_MONEY   = 0x42 // 0100 0010
-	CLAIM_PAYMENT = 0x48 // 0100 1000 (Claim for payment)
-	SPLIT_BILL    = 0x49 // 0100 1001 (Split the bill)
+	MONEY         ContentType = 0x40 // 0100 0000
+	TRANSFER      ContentType = 0x41 // 0100 0001
+	LUCKY_MONEY   ContentType = 0x42 // 0100 0010
+	CLAIM_PAYMENT ContentType = 0x48 // 0100 1000 (Claim for payment)
+	SPLIT_BILL    ContentType = 0x49 // 0100 1001 (Split the bill)
 
-	COMMAND       = 0x88 // 1000 1000
-	HISTORY       = 0x89 // 1000 1001 (Entity history command)
+	COMMAND       ContentType = 0x88 // 1000 1000
+	HISTORY       ContentType = 0x89 // 1000 1001 (Entity history command)
 
 	// top-secret message forward by proxy (Service Provider)
-	FORWARD       = 0xFF // 1111 1111
+	FORWARD       ContentType = 0xFF // 1111 1111
 )
 
-func ContentTypeParse(msgType interface{}) uint8 {
+func ContentTypeParse(msgType interface{}) ContentType {
 	if ValueIsNil(msgType) {
 		return 0
 	}
-	return uint8(msgType.(float64))
+	return ContentType(msgType.(float64))
 }
 
 func (msgType ContentType) String() string {
-	switch msgType {
-	case TEXT:
-		return "TEXT"
-
-	case FILE:
-		return "FILE"
-	case IMAGE:
-		return "IMAGE"
-	case AUDIO:
-		return "AUDIO"
-	case VIDEO:
-		return "VIDEO"
-
-	case PAGE:
-		return "PAGE"
-
-	case QUOTE:
-		return "QUOTE"
-
-	case MONEY:
-		return "MONEY"
-	case TRANSFER:
-		return "TRANSFER"
-	case LUCKY_MONEY:
-		return "LUCKY_MONEY"
-	case CLAIM_PAYMENT:
-		return "CLAIM_PAYMENT"
-	case SPLIT_BILL:
-		return "SPLIT_BILL"
-
-	case COMMAND:
-		return "COMMAND"
-	case HISTORY:
-		return "HISTORY"
-
-	case FORWARD:
-		return "FORWARD"
-
-	default:
-		return fmt.Sprintf("ContentType(%d)", msgType)
+	text := ContentTypeGetAlias(msgType)
+	if text == "" {
+		text = fmt.Sprintf("ContentType(%d)", msgType)
 	}
+	return text
+}
+
+func ContentTypeGetAlias(msgType ContentType) string {
+	return msgTypeNames[msgType]
+}
+func ContentTypeSetAlias(msgType ContentType, alias string) {
+	msgTypeNames[msgType] = alias
+}
+
+var msgTypeNames = make(map[ContentType]string, 15)
+
+func init() {
+	ContentTypeSetAlias(TEXT, "TEXT")
+
+	ContentTypeSetAlias(FILE, "FILE")
+	ContentTypeSetAlias(IMAGE, "IMAGE")
+	ContentTypeSetAlias(AUDIO, "AUDIO")
+	ContentTypeSetAlias(VIDEO, "VIDEO")
+
+	ContentTypeSetAlias(PAGE, "PAGE")
+
+	ContentTypeSetAlias(QUOTE, "QUOTE")
+
+	ContentTypeSetAlias(MONEY, "MONEY")
+	ContentTypeSetAlias(TRANSFER, "TRANSFER")
+	ContentTypeSetAlias(LUCKY_MONEY, "LUCKY_MONEY")
+	ContentTypeSetAlias(CLAIM_PAYMENT, "CLAIM_PAYMENT")
+	ContentTypeSetAlias(SPLIT_BILL, "SPLIT_BILL")
+
+	ContentTypeSetAlias(COMMAND, "COMMAND")
+	ContentTypeSetAlias(HISTORY, "HISTORY")
+
+	ContentTypeSetAlias(FORWARD, "FORWARD")
 }

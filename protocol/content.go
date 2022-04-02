@@ -55,8 +55,8 @@ import (
 type Content interface {
 	Map
 
-	Type() uint8      // message type
-	SN() uint32       // serial number as message id
+	Type() ContentType // message type
+	SN() uint32        // serial number as message id
 
 	Time() Time  // message time
 
@@ -66,7 +66,7 @@ type Content interface {
 	SetGroup(group ID)
 }
 
-func ContentGetType(content map[string]interface{}) uint8 {
+func ContentGetType(content map[string]interface{}) ContentType {
 	msgType := content["type"]
 	return ContentTypeParse(msgType)
 }
@@ -114,13 +114,13 @@ type ContentFactory interface {
 //
 //  Instances of ContentFactory
 //
-var contentFactories = make(map[uint8]ContentFactory)
+var contentFactories = make(map[ContentType]ContentFactory)
 
-func ContentSetFactory(msgType uint8, factory ContentFactory) {
+func ContentSetFactory(msgType ContentType, factory ContentFactory) {
 	contentFactories[msgType] = factory
 }
 
-func ContentGetFactory(msgType uint8) ContentFactory {
+func ContentGetFactory(msgType ContentType) ContentFactory {
 	return contentFactories[msgType]
 }
 

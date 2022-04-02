@@ -83,8 +83,8 @@ type Envelope interface {
 	 *  we pick out the content type and set it in envelope
 	 *  to let the station do its job.
 	 */
-	Type() uint8
-	SetType(msgType uint8)
+	Type() ContentType
+	SetType(msgType ContentType)
 }
 
 func EnvelopeGetSender(env map[string]interface{}) ID {
@@ -112,15 +112,15 @@ func EnvelopeSetGroup(env map[string]interface{}, group ID) {
 	}
 }
 
-func EnvelopeGetType(env map[string]interface{}) uint8 {
+func EnvelopeGetType(env map[string]interface{}) ContentType {
 	msgType := env["type"]
 	if msgType == nil {
 		return 0
 	}
-	return uint8(msgType.(float64))
+	return ContentType(msgType.(float64))
 }
 
-func EnvelopeSetType(env map[string]interface{}, msgType uint8) {
+func EnvelopeSetType(env map[string]interface{}, msgType ContentType) {
 	if msgType == 0 {
 		delete(env, "type")
 	} else {

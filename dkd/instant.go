@@ -92,7 +92,7 @@ func (msg *PlainMessage) Group() ID {
 	return msg.Content().Group()
 }
 
-func (msg *PlainMessage) Type() uint8 {
+func (msg *PlainMessage) Type() ContentType {
 	return msg.Content().Type()
 }
 

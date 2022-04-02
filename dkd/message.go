@@ -122,7 +122,7 @@ func (msg *BaseMessage) Group() ID {
 	return msg.Envelope().Group()
 }
 
-func (msg *BaseMessage) Type() uint8 {
+func (msg *BaseMessage) Type() ContentType {
 	return msg.Envelope().Type()
 }
 
