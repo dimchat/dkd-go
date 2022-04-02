@@ -33,7 +33,6 @@ package protocol
 import (
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"time"
 )
 
 /**
@@ -64,7 +63,7 @@ type Envelope interface {
 	/**
 	 * Get message time
 	 */
-	Time() time.Time
+	Time() Time
 
 	/*
 	 *  Group ID
@@ -96,13 +95,9 @@ func EnvelopeGetReceiver(env map[string]interface{}) ID {
 	return IDParse(env["receiver"])
 }
 
-func EnvelopeGetTime(env map[string]interface{}) time.Time {
-	timestamp, ok := env["time"].(int64)
-	if ok {
-		return time.Unix(timestamp, 0)
-	} else {
-		return time.Time{}
-	}
+func EnvelopeGetTime(env map[string]interface{}) Time {
+	timestamp := env["time"]
+	return TimeParse(timestamp)
 }
 
 func EnvelopeGetGroup(env map[string]interface{}) ID {
@@ -118,12 +113,11 @@ func EnvelopeSetGroup(env map[string]interface{}, group ID) {
 }
 
 func EnvelopeGetType(env map[string]interface{}) uint8 {
-	msgType, ok := env["type"].(uint8)
-	if ok {
-		return msgType
-	} else {
+	msgType := env["type"]
+	if msgType == nil {
 		return 0
 	}
+	return uint8(msgType.(float64))
 }
 
 func EnvelopeSetType(env map[string]interface{}, msgType uint8) {
@@ -148,7 +142,7 @@ type EnvelopeFactory interface {
 	 * @param when - message time
 	 * @return Envelope
 	 */
-	CreateEnvelope(from ID, to ID, when time.Time) Envelope
+	CreateEnvelope(from ID, to ID, when Time) Envelope
 
 	/**
 	 *  Parse map object to envelope
@@ -175,7 +169,7 @@ func EnvelopeGetFactory() EnvelopeFactory {
 //
 //  Factory methods
 //
-func EnvelopeCreate(from ID, to ID, when time.Time) Envelope {
+func EnvelopeCreate(from ID, to ID, when Time) Envelope {
 	factory := EnvelopeGetFactory()
 	if factory == nil {
 		panic("envelope factory not found")

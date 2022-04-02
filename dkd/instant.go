@@ -35,7 +35,6 @@ import (
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"time"
 )
 
 /**
@@ -80,12 +79,13 @@ func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
 
 //-------- IMessage
 
-func (msg *PlainMessage) Time() time.Time {
+func (msg *PlainMessage) Time() Time {
 	msgTime := msg.Content().Time()
-	if msgTime.IsZero() {
-		msgTime = msg.Envelope().Time()
+	if TimeIsNil(msgTime) {
+		return msg.Envelope().Time()
+	} else {
+		return msgTime
 	}
-	return msgTime
 }
 
 func (msg *PlainMessage) Group() ID {

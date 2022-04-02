@@ -34,7 +34,6 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"time"
 )
 
 /*
@@ -115,7 +114,7 @@ func (msg *BaseMessage) Receiver() ID {
 	return msg.Envelope().Receiver()
 }
 
-func (msg *BaseMessage) Time() time.Time {
+func (msg *BaseMessage) Time() Time {
 	return msg.Envelope().Time()
 }
 

@@ -33,7 +33,6 @@ package protocol
 import (
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"time"
 )
 
 /**
@@ -59,7 +58,7 @@ type Content interface {
 	Type() uint8      // message type
 	SN() uint32       // serial number as message id
 
-	Time() time.Time  // message time
+	Time() Time  // message time
 
 	// Group ID/string for group message
 	//    if field 'group' exists, it means this is a group message
@@ -68,30 +67,21 @@ type Content interface {
 }
 
 func ContentGetType(content map[string]interface{}) uint8 {
-	msgType, ok := content["type"].(uint8)
-	if ok {
-		return msgType
-	} else {
-		return 0
-	}
+	msgType := content["type"]
+	return ContentTypeParse(msgType)
 }
 
 func ContentGetSN(content map[string]interface{}) uint32 {
-	sn, ok := content["sn"].(uint32)
-	if ok {
-		return sn
-	} else {
+	sn := content["sn"]
+	if sn == nil {
 		return 0
 	}
+	return uint32(sn.(float64))
 }
 
-func ContentGetTime(content map[string]interface{}) time.Time {
-	timestamp, ok := content["time"].(int64)
-	if ok {
-		return time.Unix(timestamp, 0)
-	} else {
-		return time.Time{}
-	}
+func ContentGetTime(content map[string]interface{}) Time {
+	timestamp := content["time"]
+	return TimeParse(timestamp)
 }
 
 func ContentGetGroup(content map[string]interface{}) ID {

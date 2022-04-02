@@ -34,7 +34,6 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"time"
 )
 
 /**
@@ -54,13 +53,13 @@ type MessageEnvelope struct {
 
 	_sender ID
 	_receiver ID
-	_time time.Time
+	_time Time
 }
 
-func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when time.Time) *MessageEnvelope {
+func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when Time) *MessageEnvelope {
 	if ValueIsNil(dict) {
-		if when.IsZero() {
-			when = time.Now()
+		if TimeIsNil(when) {
+			when = TimeNow()
 		}
 		dict = make(map[string]interface{})
 		dict["sender"] = from.String()
@@ -81,7 +80,7 @@ func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
 		// lazy load
 		env._sender = nil
 		env._receiver = nil
-		env._time = time.Unix(0, 0)
+		env._time = TimeNil()
 	}
 	return env
 }
@@ -107,8 +106,8 @@ func (env *MessageEnvelope) Receiver() ID {
 	return env._receiver
 }
 
-func (env *MessageEnvelope) Time() time.Time {
-	if env._time.IsZero() {
+func (env *MessageEnvelope) Time() Time {
+	if TimeIsNil(env._time) {
 		env._time = EnvelopeGetTime(env.GetMap(false))
 	}
 	return env._time
@@ -153,7 +152,7 @@ type MessageEnvelopeFactory struct {}
 
 //-------- IEnvelopeFactory
 
-func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when time.Time) Envelope {
+func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when Time) Envelope {
 	return NewMessageEnvelope(nil, from, to, when)
 }
 
@@ -162,7 +161,7 @@ func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{})
 		// env.sender should not empty
 		return nil
 	} else {
-		return NewMessageEnvelope(env, nil, nil, time.Time{})
+		return NewMessageEnvelope(env, nil, nil, nil)
 	}
 }
 

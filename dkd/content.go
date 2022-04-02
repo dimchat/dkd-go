@@ -35,7 +35,6 @@ import (
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 	"math/rand"
-	"time"
 )
 
 /**
@@ -65,7 +64,7 @@ type BaseContent struct {
 	_sn uint32
 
 	// message time
-	_time time.Time
+	_time Time
 }
 
 /* designated initializer */
@@ -74,7 +73,7 @@ func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 		// lazy load
 		content._type = 0
 		content._sn = 0
-		content._time = time.Time{}
+		content._time = TimeNil()
 	}
 	return content
 }
@@ -82,8 +81,8 @@ func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 /* designated initializer */
 func (content *BaseContent) InitWithType(msgType uint8) *BaseContent {
 	// message time
-	now := time.Now()
-	stamp := now.Unix()
+	now := TimeNow()
+	stamp := UnixTime(now)
 	// serial number
 	rand.Seed(stamp)
 	sn := rand.Uint32()
@@ -116,8 +115,8 @@ func (content *BaseContent) SN() uint32 {
 	return content._sn
 }
 
-func (content *BaseContent) Time() time.Time {
-	if content._time.IsZero() {
+func (content *BaseContent) Time() Time {
+	if TimeIsNil(content._time) {
 		content._time = ContentGetTime(content.GetMap(false))
 	}
 	return content._time

@@ -34,7 +34,6 @@ import (
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"time"
 )
 
 /*
@@ -84,7 +83,7 @@ type Message interface {
 	// properties within envelope
 	Sender() ID
 	Receiver() ID
-	Time() time.Time
+	Time() Time
 
 	Group() ID
 	Type() uint8

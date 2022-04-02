@@ -30,6 +30,11 @@
  */
 package protocol
 
+import (
+	"fmt"
+	. "github.com/dimchat/mkm-go/types"
+)
+
 /*
  *  @enum DKDContentType
  *
@@ -105,3 +110,54 @@ const (
 	// top-secret message forward by proxy (Service Provider)
 	FORWARD       = 0xFF // 1111 1111
 )
+
+func ContentTypeParse(msgType interface{}) uint8 {
+	if ValueIsNil(msgType) {
+		return 0
+	}
+	return uint8(msgType.(float64))
+}
+
+func (msgType ContentType) String() string {
+	switch msgType {
+	case TEXT:
+		return "TEXT"
+
+	case FILE:
+		return "FILE"
+	case IMAGE:
+		return "IMAGE"
+	case AUDIO:
+		return "AUDIO"
+	case VIDEO:
+		return "VIDEO"
+
+	case PAGE:
+		return "PAGE"
+
+	case QUOTE:
+		return "QUOTE"
+
+	case MONEY:
+		return "MONEY"
+	case TRANSFER:
+		return "TRANSFER"
+	case LUCKY_MONEY:
+		return "LUCKY_MONEY"
+	case CLAIM_PAYMENT:
+		return "CLAIM_PAYMENT"
+	case SPLIT_BILL:
+		return "SPLIT_BILL"
+
+	case COMMAND:
+		return "COMMAND"
+	case HISTORY:
+		return "HISTORY"
+
+	case FORWARD:
+		return "FORWARD"
+
+	default:
+		return fmt.Sprintf("ContentType(%d)", msgType)
+	}
+}

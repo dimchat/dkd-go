@@ -106,9 +106,9 @@ func (msg *EncryptedMessage) EncryptedKey() []byte {
 
 func (msg *EncryptedMessage) EncryptedKeys() map[string]string {
 	if msg._keys == nil {
-		keys, ok := msg.Get("keys").(map[string]string)
-		if ok {
-			msg._keys = keys
+		keys := msg.Get("keys")
+		if keys != nil {
+			msg._keys, _ = keys.(map[string]string)
 		}
 	}
 	return msg._keys
