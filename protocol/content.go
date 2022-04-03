@@ -56,7 +56,7 @@ type Content interface {
 	Map
 
 	Type() ContentType // message type
-	SN() uint32        // serial number as message id
+	SN() uint64        // serial number as message id
 
 	Time() Time  // message time
 
@@ -71,12 +71,12 @@ func ContentGetType(content map[string]interface{}) ContentType {
 	return ContentTypeParse(msgType)
 }
 
-func ContentGetSN(content map[string]interface{}) uint32 {
+func ContentGetSN(content map[string]interface{}) uint64 {
 	sn := content["sn"]
 	if sn == nil {
 		return 0
 	}
-	return uint32(sn.(float64))
+	return uint64(sn.(float64))
 }
 
 func ContentGetTime(content map[string]interface{}) Time {

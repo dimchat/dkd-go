@@ -34,7 +34,6 @@ import (
 	. "github.com/dimchat/dkd-go/protocol"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
-	"math/rand"
 )
 
 /**
@@ -61,7 +60,7 @@ type BaseContent struct {
 	_type ContentType
 
 	// serial number: random number to identify message content
-	_sn uint32
+	_sn uint64
 
 	// message time
 	_time Time
@@ -83,8 +82,7 @@ func (content *BaseContent) InitWithType(msgType ContentType) *BaseContent {
 	// message time
 	now := TimeNow()
 	// serial number
-	rand.Seed(UnixTime(now))
-	sn := rand.Uint32()
+	sn := InstantMessageGenerateSerialNumber(msgType, now)
 	// build content info
 	dict := make(map[string]interface{})
 	dict["type"] = msgType
@@ -107,7 +105,7 @@ func (content *BaseContent) Type() ContentType {
 	return content._type
 }
 
-func (content *BaseContent) SN() uint32 {
+func (content *BaseContent) SN() uint64 {
 	if content._sn == 0 {
 		content._sn = ContentGetSN(content.GetMap(false))
 	}

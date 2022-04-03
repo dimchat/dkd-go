@@ -88,6 +88,15 @@ func InstantMessageGetContent(msg map[string]interface{}) Content {
 type InstantMessageFactory interface {
 
 	/**
+	 *  Generate SN for message content
+	 *
+	 * @param msgType - content type
+	 * @param now     - message time
+	 * @return SN (serial number as msg id)
+	 */
+	GenerateSerialNumber(msgType ContentType, now Time) uint64
+
+	/**
 	 *  Create instant message with envelope & content
 	 *
 	 * @param head - message envelope
@@ -155,4 +164,12 @@ func InstantMessageParse(msg interface{}) InstantMessage {
 		panic("instant message factory not found")
 	}
 	return factory.ParseInstantMessage(info)
+}
+
+func InstantMessageGenerateSerialNumber(msgType ContentType, now Time) uint64 {
+	factory := InstantMessageGetFactory()
+	if factory == nil {
+		panic("instant message factory not found")
+	}
+	return factory.GenerateSerialNumber(msgType, now)
 }

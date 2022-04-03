@@ -35,6 +35,7 @@ import (
 	. "github.com/dimchat/mkm-go/crypto"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
+	"math/rand"
 )
 
 /**
@@ -193,6 +194,11 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
 type PlainMessageFactory struct {}
 
 //-------- IInstantMessageFactory
+
+func (factory *PlainMessageFactory) GenerateSerialNumber(msgType ContentType, now Time) uint64 {
+	//rand.Seed(TimestampNano(now))
+	return rand.Uint64()
+}
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
 	return NewPlainMessage(nil, head, body)
