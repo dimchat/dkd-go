@@ -307,29 +307,3 @@ func (msg *EncryptedMessage) Trim(member ID) SecureMessage {
 	// repack
 	return SecureMessageParse(info)
 }
-
-/**
- *  General Factory
- *  ~~~~~~~~~~~~~~~
- */
-type EncryptedMessageFactory struct {}
-
-//-------- ISecureMessageFactory
-
-func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
-	if _, exists := msg["signature"]; exists {
-		// this should be a reliable message
-		return NewRelayMessage(msg)
-	} else {
-		return NewEncryptedMessage(msg)
-	}
-}
-
-func BuildSecureMessageFactory() SecureMessageFactory {
-	factory := SecureMessageGetFactory()
-	if factory == nil {
-		factory = new(EncryptedMessageFactory)
-		SecureMessageSetFactory(factory)
-	}
-	return factory
-}

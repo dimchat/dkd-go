@@ -143,33 +143,3 @@ func (env *MessageEnvelope) Type() ContentType {
 func (env *MessageEnvelope) SetType(msgType ContentType)  {
 	EnvelopeSetType(env.GetMap(false), msgType)
 }
-
-/**
- *  General Factory
- *  ~~~~~~~~~~~~~~~
- */
-type MessageEnvelopeFactory struct {}
-
-//-------- IEnvelopeFactory
-
-func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when Time) Envelope {
-	return NewMessageEnvelope(nil, from, to, when)
-}
-
-func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
-	if env["sender"] == nil {
-		// env.sender should not empty
-		return nil
-	} else {
-		return NewMessageEnvelope(env, nil, nil, nil)
-	}
-}
-
-func BuildEnvelopeFactory() EnvelopeFactory {
-	factory := EnvelopeGetFactory()
-	if factory == nil {
-		factory = new(MessageEnvelopeFactory)
-		EnvelopeSetFactory(factory)
-	}
-	return factory
-}

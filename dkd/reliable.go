@@ -154,31 +154,3 @@ func (msg *RelayMessage) Verify() SecureMessage {
 		return nil
 	}
 }
-
-/**
- *  General Factory
- *  ~~~~~~~~~~~~~~~
- */
-type RelayMessageFactory struct {}
-
-//-------- IReliableMessageFactory
-
-func (factory *RelayMessageFactory) ParseReliableMessage(msg map[string]interface{}) ReliableMessage {
-	// msg.sender should not empty
-	// msg.data should not empty
-	// msg.signature should not empty
-	if msg["sender"] == nil || msg["data"] == nil || msg["signature"] == nil {
-		return nil
-	} else {
-		return NewRelayMessage(msg)
-	}
-}
-
-func BuildReliableMessageFactory() ReliableMessageFactory {
-	factory := ReliableMessageGetFactory()
-	if factory == nil {
-		factory = new(RelayMessageFactory)
-		ReliableMessageSetFactory(factory)
-	}
-	return factory
-}
