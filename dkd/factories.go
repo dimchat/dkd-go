@@ -43,10 +43,14 @@ import (
  */
 type MessageEnvelopeFactory struct {}
 
+func (factory *MessageEnvelopeFactory) Init() EnvelopeFactory {
+	return factory
+}
+
 //-------- IEnvelopeFactory
 
 func (factory *MessageEnvelopeFactory) CreateEnvelope(from ID, to ID, when Time) Envelope {
-	return NewMessageEnvelope(nil, from, to, when)
+	return NewEnvelope(nil, from, to, when)
 }
 
 func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{}) Envelope {
@@ -54,7 +58,7 @@ func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{})
 		// env.sender should not empty
 		return nil
 	} else {
-		return NewMessageEnvelope(env, nil, nil, nil)
+		return NewEnvelope(env, nil, nil, nil)
 	}
 }
 
@@ -64,19 +68,34 @@ func (factory *MessageEnvelopeFactory) ParseEnvelope(env map[string]interface{})
  */
 type PlainMessageFactory struct {}
 
+func (factory *PlainMessageFactory) Init() InstantMessageFactory {
+	return factory
+}
+
 //-------- IInstantMessageFactory
 
 func (factory *PlainMessageFactory) GenerateSerialNumber(_ ContentType, _ Time) uint64 {
-	//rand.Seed(TimestampNano(now))
-	return rand.Uint64()
+	// because we must make sure all messages in a same chat box won't have
+	// same serial numbers, so we can't use time-related numbers, therefore
+	// the best choice is a totally random number, maybe.
+	sn := rand.Uint32()
+	if sn == 0 {
+		// ZERO? do it again!
+		sn = 9527 + 9394;
+	}
+	return uint64(sn)
 }
 
 func (factory *PlainMessageFactory) CreateInstantMessage(head Envelope, body Content) InstantMessage {
-	return NewPlainMessage(nil, head, body)
+	return NewInstantMessage(nil, head, body)
 }
 
 func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface{}) InstantMessage {
-	return NewPlainMessage(msg, nil, nil)
+	// msg.content should not empty
+	if msg["content"] == nil {
+		return nil
+	}
+	return NewInstantMessage(msg, nil, nil)
 }
 
 /**
@@ -85,15 +104,18 @@ func (factory *PlainMessageFactory) ParseInstantMessage(msg map[string]interface
  */
 type EncryptedMessageFactory struct {}
 
+func (factory *EncryptedMessageFactory) Init() SecureMessageFactory {
+	return factory
+}
+
 //-------- ISecureMessageFactory
 
 func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interface{}) SecureMessage {
 	if _, exists := msg["signature"]; exists {
 		// this should be a reliable message
-		return NewRelayMessage(msg)
-	} else {
-		return NewEncryptedMessage(msg)
+		return NewReliableMessage(msg)
 	}
+	return NewSecureMessage(msg)
 }
 
 /**
@@ -101,6 +123,10 @@ func (factory *EncryptedMessageFactory) ParseSecureMessage(msg map[string]interf
  *  ~~~~~~~~~~~~~~~
  */
 type RelayMessageFactory struct {}
+
+func (factory *RelayMessageFactory) Init() ReliableMessageFactory {
+	return factory
+}
 
 //-------- IReliableMessageFactory
 
@@ -110,7 +136,6 @@ func (factory *RelayMessageFactory) ParseReliableMessage(msg map[string]interfac
 	// msg.signature should not empty
 	if msg["sender"] == nil || msg["data"] == nil || msg["signature"] == nil {
 		return nil
-	} else {
-		return NewRelayMessage(msg)
 	}
+	return NewReliableMessage(msg)
 }

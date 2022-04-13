@@ -171,9 +171,6 @@ func EnvelopeGetFactory() EnvelopeFactory {
 //
 func EnvelopeCreate(from ID, to ID, when Time) Envelope {
 	factory := EnvelopeGetFactory()
-	if factory == nil {
-		panic("envelope factory not found")
-	}
 	return factory.CreateEnvelope(from, to, when)
 }
 
@@ -188,8 +185,5 @@ func EnvelopeParse(env interface{}) Envelope {
 	info := FetchMap(env)
 	// create by envelope factory
 	factory := EnvelopeGetFactory()
-	if factory == nil {
-		panic("envelope factory not found")
-	}
 	return factory.ParseEnvelope(info)
 }

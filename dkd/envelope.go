@@ -56,7 +56,7 @@ type MessageEnvelope struct {
 	_time Time
 }
 
-func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when Time) *MessageEnvelope {
+func NewEnvelope(dict map[string]interface{}, from ID, to ID, when Time) Envelope {
 	if ValueIsNil(dict) {
 		if TimeIsNil(when) {
 			when = TimeNow()
@@ -75,7 +75,7 @@ func NewMessageEnvelope(dict map[string]interface{}, from ID, to ID, when Time) 
 	return env
 }
 
-func (env *MessageEnvelope) Init(dict map[string]interface{}) *MessageEnvelope {
+func (env *MessageEnvelope) Init(dict map[string]interface{}) Envelope {
 	if env.Dictionary.Init(dict) != nil {
 		// lazy load
 		env._sender = nil

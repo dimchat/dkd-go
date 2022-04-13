@@ -132,9 +132,6 @@ func InstantMessageGetFactory() InstantMessageFactory {
 //
 func InstantMessageCreate(head Envelope, body Content) InstantMessage {
 	factory := InstantMessageGetFactory()
-	if factory == nil {
-		panic("instant message factory not found")
-	}
 	return factory.CreateInstantMessage(head, body)
 }
 
@@ -149,16 +146,10 @@ func InstantMessageParse(msg interface{}) InstantMessage {
 	info := FetchMap(msg)
 	// create by message factory
 	factory := InstantMessageGetFactory()
-	if factory == nil {
-		panic("instant message factory not found")
-	}
 	return factory.ParseInstantMessage(info)
 }
 
 func InstantMessageGenerateSerialNumber(msgType ContentType, now Time) uint64 {
 	factory := InstantMessageGetFactory()
-	if factory == nil {
-		panic("instant message factory not found")
-	}
 	return factory.GenerateSerialNumber(msgType, now)
 }

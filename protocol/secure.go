@@ -166,8 +166,5 @@ func SecureMessageParse(msg interface{}) SecureMessage {
 	info := FetchMap(msg)
 	// create by message factory
 	factory := SecureMessageGetFactory()
-	if factory == nil {
-		panic("secure message factory not found")
-	}
 	return factory.ParseSecureMessage(info)
 }

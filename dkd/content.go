@@ -67,7 +67,7 @@ type BaseContent struct {
 }
 
 /* designated initializer */
-func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
+func (content *BaseContent) Init(dict map[string]interface{}) Content {
 	if content.Dictionary.Init(dict) != nil {
 		// lazy load
 		content._type = 0
@@ -78,7 +78,7 @@ func (content *BaseContent) Init(dict map[string]interface{}) *BaseContent {
 }
 
 /* designated initializer */
-func (content *BaseContent) InitWithType(msgType ContentType) *BaseContent {
+func (content *BaseContent) InitWithType(msgType ContentType) Content {
 	// message time
 	now := TimeNow()
 	// serial number

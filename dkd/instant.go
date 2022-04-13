@@ -56,7 +56,7 @@ type PlainMessage struct {
 	_content Content
 }
 
-func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *PlainMessage {
+func NewInstantMessage(dict map[string]interface{}, head Envelope, body Content) InstantMessage {
 	if ValueIsNil(dict) {
 		dict = head.GetMap(false)
 		dict["content"] = body.GetMap(false)
@@ -69,7 +69,7 @@ func NewPlainMessage(dict map[string]interface{}, head Envelope, body Content) *
 	return msg
 }
 
-func (msg *PlainMessage) Init(dict map[string]interface{}) *PlainMessage {
+func (msg *PlainMessage) Init(dict map[string]interface{}) InstantMessage {
 	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
 		msg._content = nil

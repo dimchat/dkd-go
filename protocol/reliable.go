@@ -175,8 +175,5 @@ func ReliableMessageParse(msg interface{}) ReliableMessage {
 	info := FetchMap(msg)
 	// create by message factory
 	factory := ReliableMessageGetFactory()
-	if factory == nil {
-		panic("reliable message factory not found")
-	}
 	return factory.ParseReliableMessage(info)
 }

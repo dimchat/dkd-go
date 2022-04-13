@@ -62,11 +62,13 @@ type EncryptedMessage struct {
 	_keys map[string]string
 }
 
-func NewEncryptedMessage(dict map[string]interface{}) *EncryptedMessage {
-	return new(EncryptedMessage).Init(dict)
+func NewSecureMessage(dict map[string]interface{}) SecureMessage {
+	msg := new(EncryptedMessage)
+	msg.Init(dict)
+	return msg
 }
 
-func (msg *EncryptedMessage) Init(dict map[string]interface{}) *EncryptedMessage {
+func (msg *EncryptedMessage) Init(dict map[string]interface{}) SecureMessage {
 	if msg.BaseMessage.Init(dict) != nil {
 		// lazy load
 		msg._data = nil

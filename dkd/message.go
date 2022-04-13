@@ -80,7 +80,7 @@ type BaseMessage struct {
 	_delegate MessageDelegate
 }
 
-func (msg *BaseMessage) Init(dict map[string]interface{}) *BaseMessage {
+func (msg *BaseMessage) Init(dict map[string]interface{}) Message {
 	if msg.Dictionary.Init(dict) != nil {
 		// lazy load
 		msg._env = nil

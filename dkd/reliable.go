@@ -65,11 +65,13 @@ type RelayMessage struct {
 	_visa Visa
 }
 
-func NewRelayMessage(dict map[string]interface{}) *RelayMessage {
-	return new(RelayMessage).Init(dict)
+func NewReliableMessage(dict map[string]interface{}) ReliableMessage {
+	msg := new(RelayMessage)
+	msg.Init(dict)
+	return msg
 }
 
-func (msg *RelayMessage) Init(dict map[string]interface{}) *RelayMessage {
+func (msg *RelayMessage) Init(dict map[string]interface{}) ReliableMessage {
 	if msg.EncryptedMessage.Init(dict) != nil {
 		// lazy load
 		msg._signature = nil
