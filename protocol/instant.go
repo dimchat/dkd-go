@@ -146,18 +146,7 @@ func InstantMessageParse(msg interface{}) InstantMessage {
 	if ok {
 		return value
 	}
-	// get message info
-	var info map[string]interface{}
-	wrapper, ok := msg.(Map)
-	if ok {
-		info = wrapper.GetMap(false)
-	} else {
-		info, ok = msg.(map[string]interface{})
-		if !ok {
-			panic(msg)
-			return nil
-		}
-	}
+	info := FetchMap(msg)
 	// create by message factory
 	factory := InstantMessageGetFactory()
 	if factory == nil {

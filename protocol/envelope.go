@@ -185,18 +185,7 @@ func EnvelopeParse(env interface{}) Envelope {
 	if ok {
 		return value
 	}
-	// get envelope info
-	var info map[string]interface{}
-	wrapper, ok := env.(Map)
-	if ok {
-		info = wrapper.GetMap(false)
-	} else {
-		info, ok = env.(map[string]interface{})
-		if !ok {
-			panic(env)
-			return nil
-		}
-	}
+	info := FetchMap(env)
 	// create by envelope factory
 	factory := EnvelopeGetFactory()
 	if factory == nil {

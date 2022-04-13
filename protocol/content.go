@@ -135,18 +135,7 @@ func ContentParse(content interface{}) Content {
 	if ok {
 		return value
 	}
-	// get content info
-	var info map[string]interface{}
-	wrapper, ok := content.(Map)
-	if ok {
-		info = wrapper.GetMap(false)
-	} else {
-		info, ok = content.(map[string]interface{})
-		if !ok {
-			panic(content)
-			return nil
-		}
-	}
+	info := FetchMap(content)
 	// get content factory by type
 	msgType := ContentGetType(info)
 	factory := ContentGetFactory(msgType)
