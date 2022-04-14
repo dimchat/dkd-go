@@ -89,14 +89,14 @@ func (env *MessageEnvelope) Init(dict map[string]interface{}) Envelope {
 
 func (env *MessageEnvelope) Sender() ID {
 	if env._sender == nil {
-		env._sender = EnvelopeGetSender(env.GetMap(false))
+		env._sender = EnvelopeGetSender(env.Map())
 	}
 	return env._sender
 }
 
 func (env *MessageEnvelope) Receiver() ID {
 	if env._receiver == nil {
-		receiver := EnvelopeGetReceiver(env.GetMap(false))
+		receiver := EnvelopeGetReceiver(env.Map())
 		if receiver == nil {
 			env._receiver = ANYONE
 		} else {
@@ -108,7 +108,7 @@ func (env *MessageEnvelope) Receiver() ID {
 
 func (env *MessageEnvelope) Time() Time {
 	if TimeIsNil(env._time) {
-		env._time = EnvelopeGetTime(env.GetMap(false))
+		env._time = EnvelopeGetTime(env.Map())
 	}
 	return env._time
 }
@@ -121,11 +121,11 @@ func (env *MessageEnvelope) Time() Time {
  *  the group ID will be saved as 'group'.
  */
 func (env *MessageEnvelope) Group() ID {
-	return EnvelopeGetGroup(env.GetMap(false))
+	return EnvelopeGetGroup(env.Map())
 }
 
 func (env *MessageEnvelope) SetGroup(group ID)  {
-	EnvelopeSetGroup(env.GetMap(false), group)
+	EnvelopeSetGroup(env.Map(), group)
 }
 
 /*
@@ -137,9 +137,9 @@ func (env *MessageEnvelope) SetGroup(group ID)  {
  *  to let the station do its job.
  */
 func (env *MessageEnvelope) Type() ContentType {
-	return EnvelopeGetType(env.GetMap(false))
+	return EnvelopeGetType(env.Map())
 }
 
 func (env *MessageEnvelope) SetType(msgType ContentType)  {
-	EnvelopeSetType(env.GetMap(false), msgType)
+	EnvelopeSetType(env.Map(), msgType)
 }

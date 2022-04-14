@@ -189,11 +189,11 @@ func (msg *EncryptedMessage) Decrypt() InstantMessage {
 	//      (do it in 'core' module)
 
 	// 3. pack message
-	info := msg.GetMap(true)
+	info := msg.CopyMap(false)
 	delete(info, "key")
 	delete(info, "keys")
 	delete(info, "data")
-	info["content"] = content.GetMap(false)
+	info["content"] = content.Map()
 	return InstantMessageParse(info)
 }
 
@@ -225,7 +225,7 @@ func (msg *EncryptedMessage) Sign() ReliableMessage {
 	// 2. encode signature
 	base64 := delegate.EncodeSignature(signature, msg)
 	// 3. pack message
-	info := msg.GetMap(true)
+	info := msg.CopyMap(false)
 	info["signature"] = base64
 	return ReliableMessageParse(info)
 }
@@ -243,7 +243,7 @@ func (msg *EncryptedMessage) Sign() ReliableMessage {
  *  @return secure/reliable message(s)
  */
 func (msg *EncryptedMessage) Split(members []ID) []SecureMessage {
-	info := msg.GetMap(true)
+	info := msg.CopyMap(false)
 	// check 'keys'
 	keys := msg.EncryptedKeys()
 	if keys == nil {
@@ -271,7 +271,7 @@ func (msg *EncryptedMessage) Split(members []ID) []SecureMessage {
 			info["key"] = base64
 		}
 		// 4. repack message
-		sMsg := SecureMessageParse(CloneMap(info))
+		sMsg := SecureMessageParse(CopyMap(info))
 		if sMsg != nil {
 			messages = append(messages, sMsg)
 		}
@@ -286,7 +286,7 @@ func (msg *EncryptedMessage) Split(members []ID) []SecureMessage {
  * @return SecureMessage
  */
 func (msg *EncryptedMessage) Trim(member ID) SecureMessage {
-	info := msg.GetMap(true)
+	info := msg.CopyMap(false)
 	// check 'keys'
 	keys := msg.EncryptedKeys()
 	if keys != nil {

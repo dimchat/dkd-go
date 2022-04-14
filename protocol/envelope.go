@@ -48,7 +48,7 @@ import (
  *  }
  */
 type Envelope interface {
-	Map
+	Mapper
 
 	/**
 	 * Get message sender

@@ -94,25 +94,25 @@ func (msg *RelayMessage) Signature() []byte {
 
 func (msg *RelayMessage) Meta() Meta {
 	if msg._meta == nil {
-		msg._meta = ReliableMessageGetMeta(msg.GetMap(false))
+		msg._meta = ReliableMessageGetMeta(msg.Map())
 	}
 	return msg._meta
 }
 
 func (msg *RelayMessage) SetMeta(meta Meta) {
-	ReliableMessageSetMeta(msg.GetMap(false), meta)
+	ReliableMessageSetMeta(msg.Map(), meta)
 	msg._meta = meta
 }
 
 func (msg *RelayMessage) Visa() Visa {
 	if msg._visa == nil {
-		msg._visa = ReliableMessageGetVisa(msg.GetMap(false))
+		msg._visa = ReliableMessageGetVisa(msg.Map())
 	}
 	return msg._visa
 }
 
 func (msg *RelayMessage) SetVisa(visa Visa) {
-	ReliableMessageSetVisa(msg.GetMap(false), visa)
+	ReliableMessageSetVisa(msg.Map(), visa)
 	msg._visa = visa
 }
 
@@ -148,7 +148,7 @@ func (msg *RelayMessage) Verify() SecureMessage {
 	// 1. verify data signature with sender's public key
 	if msg.Delegate().VerifyDataSignature(data, signature, sender, msg) {
 		// 2. pack message
-		info := msg.GetMap(true)
+		info := msg.CopyMap(false)
 		delete(info, "signature")
 		return SecureMessageParse(info)
 	} else {

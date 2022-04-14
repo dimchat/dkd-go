@@ -101,7 +101,7 @@ func (msg *BaseMessage) SetDelegate(delegate MessageDelegate) {
 
 func (msg *BaseMessage) Envelope() Envelope {
 	if msg._env == nil {
-		msg._env = MessageGetEnvelope(msg.GetMap(false))
+		msg._env = MessageGetEnvelope(msg.Map())
 	}
 	return msg._env
 }

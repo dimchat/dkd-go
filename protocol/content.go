@@ -53,7 +53,7 @@ import (
  *  }
  */
 type Content interface {
-	Map
+	Mapper
 
 	Type() ContentType // message type
 	SN() uint64        // serial number as message id

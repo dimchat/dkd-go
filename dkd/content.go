@@ -100,29 +100,29 @@ func (content *BaseContent) InitWithType(msgType ContentType) Content {
 
 func (content *BaseContent) Type() ContentType {
 	if content._type == 0 {
-		content._type = ContentGetType(content.GetMap(false))
+		content._type = ContentGetType(content.Map())
 	}
 	return content._type
 }
 
 func (content *BaseContent) SN() uint64 {
 	if content._sn == 0 {
-		content._sn = ContentGetSN(content.GetMap(false))
+		content._sn = ContentGetSN(content.Map())
 	}
 	return content._sn
 }
 
 func (content *BaseContent) Time() Time {
 	if TimeIsNil(content._time) {
-		content._time = ContentGetTime(content.GetMap(false))
+		content._time = ContentGetTime(content.Map())
 	}
 	return content._time
 }
 
 func (content *BaseContent) Group() ID {
-	return ContentGetGroup(content.GetMap(false))
+	return ContentGetGroup(content.Map())
 }
 
 func (content *BaseContent) SetGroup(group ID)  {
-	ContentSetGroup(content.GetMap(false), group)
+	ContentSetGroup(content.Map(), group)
 }

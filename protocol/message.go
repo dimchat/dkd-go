@@ -73,7 +73,7 @@ import (
  *  }
  */
 type Message interface {
-	Map
+	Mapper
 
 	Delegate() MessageDelegate
 	SetDelegate(delegate MessageDelegate)

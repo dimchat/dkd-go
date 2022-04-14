@@ -58,8 +58,8 @@ type PlainMessage struct {
 
 func NewInstantMessage(dict map[string]interface{}, head Envelope, body Content) InstantMessage {
 	if ValueIsNil(dict) {
-		dict = head.GetMap(false)
-		dict["content"] = body.GetMap(false)
+		dict = head.Map()
+		dict["content"] = body.Map()
 	}
 	msg := new(PlainMessage)
 	if msg.BaseMessage.Init(dict) != nil {
@@ -100,7 +100,7 @@ func (msg *PlainMessage) Type() ContentType {
 
 func (msg *PlainMessage) Content() Content {
 	if msg._content == nil {
-		msg._content = InstantMessageGetContent(msg.GetMap(false))
+		msg._content = InstantMessageGetContent(msg.Map())
 	}
 	return msg._content
 }
@@ -135,7 +135,7 @@ func (msg *PlainMessage) Encrypt(password SymmetricKey, members []ID) SecureMess
 	data := delegate.SerializeContent(content, password, msg)
 	data = delegate.EncryptContent(data, password, msg)
 	base64 := delegate.EncodeData(data, msg)
-	info := msg.GetMap(true)
+	info := msg.CopyMap(false)
 	delete(info, "content")
 	info["data"] = base64
 

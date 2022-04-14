@@ -111,7 +111,7 @@ func ReliableMessageSetMeta(msg map[string]interface{}, meta Meta) {
 	if ValueIsNil(meta) {
 		delete(msg, "meta")
 	} else {
-		msg["meta"] = meta.GetMap(false)
+		msg["meta"] = meta.Map()
 	}
 }
 
@@ -129,7 +129,7 @@ func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
 	if ValueIsNil(visa) {
 		delete(msg, "visa")
 	} else {
-		msg["visa"] = visa.GetMap(false)
+		msg["visa"] = visa.Map()
 	}
 }
 
