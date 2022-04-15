@@ -81,7 +81,7 @@ func (factory *PlainMessageFactory) GenerateSerialNumber(_ ContentType, _ Time) 
 	sn := rand.Uint32()
 	if sn == 0 {
 		// ZERO? do it again!
-		sn = 9527 + 9394;
+		sn = 9527 + 9394
 	}
 	return uint64(sn)
 }
