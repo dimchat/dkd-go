@@ -31,69 +31,48 @@
 package protocol
 
 import (
+	. "github.com/dimchat/dkd-go/ext"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 )
 
+type ContentType = string
+
+type SerialNumberType = uint64
+
 /**
  *  Message Content
- *  ~~~~~~~~~~~~~~~
- *  This class is for creating message content
+ *  <p>
+ *      This class is for creating message content
+ *  </p>
  *
+ *  <blockquote><pre>
  *  data format: {
- *      'type'    : 0x00,            // message type
- *      'sn'      : 0,               // serial number
+ *      "type"    : i2s(0),         // message type
+ *      "sn"      : 0,              // serial number
  *
- *      'group'   : 'Group ID',      // for group message
+ *      "time"    : 123,            // message time
+ *      "group"   : "{GroupID}",    // for group message
  *
  *      //-- message info
- *      'text'    : 'text',          // for text message
- *      'command' : 'Command Name',  // for system command
+ *      "text"    : "text",         // for text message
+ *      "command" : "Command Name"  // for system command
  *      //...
  *  }
+ *  </pre></blockquote>
  */
 type Content interface {
 	Mapper
 
-	Type() ContentType // message type
-	SN() uint64        // serial number as message id
+	Type() ContentType     // content type
+	SN() SerialNumberType  // serial number as message id
 
-	Time() Time  // message time
+	Time() Time            // message time
 
 	// Group ID/string for group message
 	//    if field 'group' exists, it means this is a group message
 	Group() ID
 	SetGroup(group ID)
-}
-
-func ContentGetType(content map[string]interface{}) ContentType {
-	msgType := content["type"]
-	return ContentTypeParse(msgType)
-}
-
-func ContentGetSN(content map[string]interface{}) uint64 {
-	sn := content["sn"]
-	if sn == nil {
-		return 0
-	}
-	return uint64(sn.(float64))
-}
-
-func ContentGetTime(content map[string]interface{}) Time {
-	timestamp := content["time"]
-	return TimeParse(timestamp)
-}
-
-func ContentGetGroup(content map[string]interface{}) ID {
-	return IDParse(content["group"])
-}
-
-func ContentSetGroup(content map[string]interface{}, group ID) {
-	if ValueIsNil(group) {
-		delete(content, "group")
-	} else {
-		content["group"] = group.String()
-	}
 }
 
 /**
@@ -108,39 +87,24 @@ type ContentFactory interface {
 	 * @param content - content info
 	 * @return Content
 	 */
-	ParseContent(content map[string]interface{}) Content
-}
-
-//
-//  Instances of ContentFactory
-//
-var contentFactories = make(map[ContentType]ContentFactory)
-
-func ContentSetFactory(msgType ContentType, factory ContentFactory) {
-	contentFactories[msgType] = factory
-}
-
-func ContentGetFactory(msgType ContentType) ContentFactory {
-	return contentFactories[msgType]
+	ParseContent(content StringKeyMap) Content
 }
 
 //
 //  Factory method
 //
-func ContentParse(content interface{}) Content {
-	if ValueIsNil(content) {
-		return nil
-	}
-	value, ok := content.(Content)
-	if ok {
-		return value
-	}
-	info := FetchMap(content)
-	// get content factory by type
-	msgType := ContentGetType(info)
-	factory := ContentGetFactory(msgType)
-	if factory == nil {
-		factory = ContentGetFactory(0)  // unknown
-	}
-	return factory.ParseContent(info)
+
+func ParseContent(content interface{}) Content {
+	helper := GetContentHelper()
+	return helper.ParseContent(content)
+}
+
+func GetContentFactory(msgType ContentType) ContentFactory {
+	helper := GetContentHelper()
+	return helper.GetContentFactory(msgType)
+}
+
+func SetContentFactory(msgType ContentType, factory ContentFactory) {
+	helper := GetContentHelper()
+	helper.SetContentFactory(msgType, factory)
 }

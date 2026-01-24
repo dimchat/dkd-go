@@ -31,106 +31,41 @@
 package protocol
 
 import (
+	. "github.com/dimchat/dkd-go/ext"
+	. "github.com/dimchat/mkm-go/format"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 )
 
 /**
  *  Reliable Message signed by an asymmetric key
- *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *  This class is used to sign the SecureMessage
- *  It contains a 'signature' field which signed with sender's private key
+ *  <p>
+ *      This class is used to sign the SecureMessage.
+ *      It contains a 'signature' field which signed with sender's private key
+ *  </p>
  *
+ *  <blockquote><pre>
  *  data format: {
  *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
+ *      "sender"   : "moki@xxx",
+ *      "receiver" : "hulk@yyy",
+ *      "time"     : 123,
+ *
  *      //-- content data and key/keys
- *      data     : "...",  // base64_encode(symmetric)
- *      key      : "...",  // base64_encode(asymmetric)
- *      keys     : {
- *          "ID1": "key1", // base64_encode(asymmetric)
+ *      "data"     : "...",  // base64_encode( symmetric_encrypt(content))
+ *      "keys"     : {
+ *          "{ID}"   : "...",  // base64_encode(asymmetric_encrypt(pwd))
+ *          "digest" : "..."   // hash(pwd.data)
  *      },
  *      //-- signature
- *      signature: "..."   // base64_encode()
+ *      "signature": "..."   // base64_encode(asymmetric_sign(data))
  *  }
+ *  </pre></blockquote>
  */
 type ReliableMessage interface {
 	SecureMessage
 
-	Signature() []byte
-
-	/**
-	 *  Sender's Meta
-	 *  ~~~~~~~~~~~~~
-	 *  Extends for the first message package of 'Handshake' protocol.
-	 *
-	 * @param meta - Meta
-	 */
-	Meta() Meta
-	SetMeta(meta Meta)
-
-	/**
-	 *  Sender's Visa
-	 *  ~~~~~~~~~~~~~
-	 *  Extends for the first message package of 'Handshake' protocol.
-	 *
-	 * @param doc - Visa
-	 */
-	Visa() Visa
-	SetVisa(visa Visa)
-
-	/*
-	 *  Verify the Reliable Message to Secure Message
-	 *
-	 *    +----------+      +----------+
-	 *    | sender   |      | sender   |
-	 *    | receiver |      | receiver |
-	 *    | time     |  ->  | time     |
-	 *    |          |      |          |
-	 *    | data     |      | data     |  1. verify(data, signature, sender.PK)
-	 *    | key/keys |      | key/keys |
-	 *    | signature|      +----------+
-	 *    +----------+
-	 */
-
-	/**
-	 *  Verify 'data' and 'signature' field with sender's public key
-	 *
-	 * @return SecureMessage object
-	 */
-	Verify() SecureMessage
-}
-
-func ReliableMessageGetMeta(msg map[string]interface{}) Meta {
-	return MetaParse(msg["meta"])
-}
-
-func ReliableMessageSetMeta(msg map[string]interface{}, meta Meta) {
-	if ValueIsNil(meta) {
-		delete(msg, "meta")
-	} else {
-		msg["meta"] = meta.Map()
-	}
-}
-
-func ReliableMessageGetVisa(msg map[string]interface{}) Visa {
-	doc := DocumentParse(msg["visa"])
-	visa, ok := doc.(Visa)
-	if ok {
-		return visa
-	} else {
-		return nil
-	}
-}
-
-func ReliableMessageSetVisa(msg map[string]interface{}, visa Visa) {
-	if ValueIsNil(visa) {
-		delete(msg, "visa")
-	} else {
-		msg["visa"] = visa.Map()
-	}
+	Signature() TransportableData
 }
 
 /**
@@ -145,35 +80,24 @@ type ReliableMessageFactory interface {
 	 * @param msg - message info
 	 * @return ReliableMessage
 	 */
-	ParseReliableMessage(msg map[string]interface{}) ReliableMessage
-}
-
-//
-//  Instance of ReliableMessageFactory
-//
-var reliableFactory ReliableMessageFactory = nil
-
-func ReliableMessageSetFactory(factory ReliableMessageFactory) {
-	reliableFactory = factory
-}
-
-func ReliableMessageGetFactory() ReliableMessageFactory {
-	return reliableFactory
+	ParseReliableMessage(msg StringKeyMap) ReliableMessage
 }
 
 //
 //  Factory method
 //
-func ReliableMessageParse(msg interface{}) ReliableMessage {
-	if ValueIsNil(msg) {
-		return nil
-	}
-	value, ok := msg.(ReliableMessage)
-	if ok {
-		return value
-	}
-	info := FetchMap(msg)
-	// create by message factory
-	factory := ReliableMessageGetFactory()
-	return factory.ParseReliableMessage(info)
+
+func ParseReliableMessage(msg interface{}) ReliableMessage {
+	helper := GetReliableMessageHelper()
+	return helper.ParseReliableMessage(msg)
+}
+
+func GetReliableMessageFactory() ReliableMessageFactory {
+	helper := GetReliableMessageHelper()
+	return helper.GetReliableMessageFactory()
+}
+
+func SetReliableMessageFactory(factory ReliableMessageFactory) {
+	helper := GetReliableMessageHelper()
+	helper.SetReliableMessageFactory(factory)
 }

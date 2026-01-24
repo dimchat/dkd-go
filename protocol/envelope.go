@@ -31,21 +31,25 @@
 package protocol
 
 import (
+	. "github.com/dimchat/dkd-go/ext"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 )
 
 /**
  *  Envelope for message
- *  ~~~~~~~~~~~~~~~~~~~~
- *  This class is used to create a message envelope
- *  which contains 'sender', 'receiver' and 'time'
+ *  <p>
+ *      This class is used to create a message envelope
+ *      which contains 'sender', 'receiver' and 'time'
+ *  </p>
  *
+ *  <blockquote><pre>
  *  data format: {
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123
+ *      "sender"   : "moki@xxx",
+ *      "receiver" : "hulk@yyy",
+ *      "time"     : 123
  *  }
+ *  </pre></blockquote>
  */
 type Envelope interface {
 	Mapper
@@ -87,47 +91,6 @@ type Envelope interface {
 	SetType(msgType ContentType)
 }
 
-func EnvelopeGetSender(env map[string]interface{}) ID {
-	return IDParse(env["sender"])
-}
-
-func EnvelopeGetReceiver(env map[string]interface{}) ID {
-	return IDParse(env["receiver"])
-}
-
-func EnvelopeGetTime(env map[string]interface{}) Time {
-	timestamp := env["time"]
-	return TimeParse(timestamp)
-}
-
-func EnvelopeGetGroup(env map[string]interface{}) ID {
-	return IDParse(env["group"])
-}
-
-func EnvelopeSetGroup(env map[string]interface{}, group ID) {
-	if ValueIsNil(group) {
-		delete(env, "group")
-	} else {
-		env["group"] = group.String()
-	}
-}
-
-func EnvelopeGetType(env map[string]interface{}) ContentType {
-	msgType := env["type"]
-	if msgType == nil {
-		return 0
-	}
-	return ContentType(msgType.(float64))
-}
-
-func EnvelopeSetType(env map[string]interface{}, msgType ContentType) {
-	if msgType == 0 {
-		delete(env, "type")
-	} else {
-		env["type"] = msgType
-	}
-}
-
 /**
  *  Envelope Factory
  *  ~~~~~~~~~~~~~~~~
@@ -142,7 +105,7 @@ type EnvelopeFactory interface {
 	 * @param when - message time
 	 * @return Envelope
 	 */
-	CreateEnvelope(from ID, to ID, when Time) Envelope
+	CreateEnvelope(from, to ID, when Time) Envelope
 
 	/**
 	 *  Parse map object to envelope
@@ -150,40 +113,29 @@ type EnvelopeFactory interface {
 	 * @param env - envelope info
 	 * @return Envelope
 	 */
-	ParseEnvelope(env map[string]interface{}) Envelope
-}
-
-//
-//  Instance of EnvelopeFactory
-//
-var envelopeFactory EnvelopeFactory = nil
-
-func EnvelopeSetFactory(factory EnvelopeFactory) {
-	envelopeFactory = factory
-}
-
-func EnvelopeGetFactory() EnvelopeFactory {
-	return envelopeFactory
+	ParseEnvelope(env StringKeyMap) Envelope
 }
 
 //
 //  Factory methods
 //
-func EnvelopeCreate(from ID, to ID, when Time) Envelope {
-	factory := EnvelopeGetFactory()
-	return factory.CreateEnvelope(from, to, when)
+
+func CreateEnvelope(from, to ID, when Time) Envelope {
+	helper := GetEnvelopeHelper()
+	return helper.CreateEnvelope(from, to, when)
 }
 
-func EnvelopeParse(env interface{}) Envelope {
-	if ValueIsNil(env) {
-		return nil
-	}
-	value, ok := env.(Envelope)
-	if ok {
-		return value
-	}
-	info := FetchMap(env)
-	// create by envelope factory
-	factory := EnvelopeGetFactory()
-	return factory.ParseEnvelope(info)
+func ParseEnvelope(env interface{}) Envelope {
+	helper := GetEnvelopeHelper()
+	return helper.ParseEnvelope(env)
+}
+
+func GetEnvelopeFactory() EnvelopeFactory {
+	helper := GetEnvelopeHelper()
+	return helper.GetEnvelopeFactory()
+}
+
+func SetEnvelopeFactory(factory EnvelopeFactory) {
+	helper := GetEnvelopeHelper()
+	helper.SetEnvelopeFactory(factory)
 }

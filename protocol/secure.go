@@ -31,97 +31,40 @@
 package protocol
 
 import (
-	. "github.com/dimchat/mkm-go/protocol"
+	. "github.com/dimchat/dkd-go/ext"
+	. "github.com/dimchat/mkm-go/format"
 	. "github.com/dimchat/mkm-go/types"
 )
 
 /**
  *  Secure Message
- *  ~~~~~~~~~~~~~~
- *  Instant Message encrypted by a symmetric key
+ *  <p>
+ *      Instant Message encrypted by a symmetric key
+ *  </p>
  *
+ *  <blockquote><pre>
  *  data format: {
  *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
+ *      "sender"   : "moki@xxx",
+ *      "receiver" : "hulk@yyy",
+ *      "time"     : 123,
+ *
  *      //-- content data and key/keys
- *      data     : "...",  // base64_encode(symmetric)
- *      key      : "...",  // base64_encode(asymmetric)
- *      keys     : {
- *          "ID1": "key1", // base64_encode(asymmetric)
+ *      "data"     : "...",  // base64_encode( symmetric_encrypt(content))
+ *      "keys"     : {
+ *          "{ID}"   : "...",  // base64_encode(asymmetric_encrypt(pwd))
+ *          "digest" : "..."   // hash(pwd.data)
  *      }
  *  }
+ *  </pre></blockquote>
  */
 type SecureMessage interface {
 	Message
 
-	EncryptedData() []byte
-	EncryptedKey() []byte
-	EncryptedKeys() map[string]string
+	Data() TransportableData
 
-	/*
-	 *  Decrypt the Secure Message to Instant Message
-	 *
-	 *    +----------+      +----------+
-	 *    | sender   |      | sender   |
-	 *    | receiver |      | receiver |
-	 *    | time     |  ->  | time     |
-	 *    |          |      |          |  1. PW      = decrypt(key, receiver.SK)
-	 *    | data     |      | content  |  2. content = decrypt(data, PW)
-	 *    | key/keys |      +----------+
-	 *    +----------+
-	 */
-
-	/**
-	 *  Decrypt message, replace encrypted 'data' with 'content' field
-	 *
-	 * @return InstantMessage object
-	 */
-	Decrypt() InstantMessage
-
-	/*
-	 *  Sign the Secure Message to Reliable Message
-	 *
-	 *    +----------+      +----------+
-	 *    | sender   |      | sender   |
-	 *    | receiver |      | receiver |
-	 *    | time     |  ->  | time     |
-	 *    |          |      |          |
-	 *    | data     |      | data     |
-	 *    | key/keys |      | key/keys |
-	 *    +----------+      | signature|  1. signature = sign(data, sender.SK)
-	 *                      +----------+
-	 */
-
-	/**
-	 *  Sign message.data, add 'signature' field
-	 *
-	 * @return ReliableMessage object
-	 */
-	Sign() ReliableMessage
-
-	/*
-	 *  Split/Trim group message
-	 *
-	 *  for each members, get key from 'keys' and replace 'receiver' to member ID
-	 */
-
-	/**
-	 *  Split the group message to single person messages
-	 *
-	 *  @param members - group members
-	 *  @return secure/reliable message(s)
-	 */
-	Split(members []ID) []SecureMessage
-
-	/**
-	 *  Trim the group message for a member
-	 *
-	 * @param member - group member ID/string
-	 * @return SecureMessage
-	 */
-	Trim(member ID) SecureMessage
+	// String => String
+	EncryptedKeys() StringKeyMap
 }
 
 /**
@@ -136,35 +79,24 @@ type SecureMessageFactory interface {
 	 * @param msg - message info
 	 * @return SecureMessage
 	 */
-	ParseSecureMessage(msg map[string]interface{}) SecureMessage
-}
-
-//
-//  Instance of SecureMessageFactory
-//
-var secureFactory SecureMessageFactory = nil
-
-func SecureMessageSetFactory(factory SecureMessageFactory) {
-	secureFactory = factory
-}
-
-func SecureMessageGetFactory() SecureMessageFactory {
-	return secureFactory
+	ParseSecureMessage(msg StringKeyMap) SecureMessage
 }
 
 //
 //  Factory method
 //
-func SecureMessageParse(msg interface{}) SecureMessage {
-	if ValueIsNil(msg) {
-		return nil
-	}
-	value, ok := msg.(SecureMessage)
-	if ok {
-		return value
-	}
-	info := FetchMap(msg)
-	// create by message factory
-	factory := SecureMessageGetFactory()
-	return factory.ParseSecureMessage(info)
+
+func ParseSecureMessage(msg interface{}) SecureMessage {
+	helper := GetSecureMessageHelper()
+	return helper.ParseSecureMessage(msg)
+}
+
+func GetSecureMessageFactory() SecureMessageFactory {
+	helper := GetSecureMessageHelper()
+	return helper.GetSecureMessageFactory()
+}
+
+func SetSecureMessageFactory(factory SecureMessageFactory) {
+	helper := GetSecureMessageHelper()
+	helper.SetSecureMessageFactory(factory)
 }

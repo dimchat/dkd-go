@@ -31,54 +31,33 @@
 package protocol
 
 import (
-	. "github.com/dimchat/mkm-go/crypto"
-	. "github.com/dimchat/mkm-go/protocol"
+	. "github.com/dimchat/dkd-go/ext"
 	. "github.com/dimchat/mkm-go/types"
 )
 
 /**
  *  Instant Message
- *  ~~~~~~~~~~~~~~~
  *
+ *  <blockquote><pre>
  *  data format: {
  *      //-- envelope
- *      sender   : "moki@xxx",
- *      receiver : "hulk@yyy",
- *      time     : 123,
+ *      "sender"   : "moki@xxx",
+ *      "receiver" : "hulk@yyy",
+ *      "time"     : 123,
+ *
  *      //-- content
- *      content  : {...}
+ *      "content"  : {...}
  *  }
+ *  </pre></blockquote>
  */
 type InstantMessage interface {
 	Message
 
 	Content() Content
-
-	/*
-	 *  Encrypt the Instant Message to Secure Message
-	 *
-	 *    +----------+      +----------+
-	 *    | sender   |      | sender   |
-	 *    | receiver |      | receiver |
-	 *    | time     |  ->  | time     |
-	 *    |          |      |          |
-	 *    | content  |      | data     |  1. data = encrypt(content, PW)
-	 *    +----------+      | key/keys |  2. key  = encrypt(PW, receiver.PK)
-	 *                      +----------+
-	 */
-
-	/**
-	 *  Encrypt message, replace 'content' field with encrypted 'data'
-	 *
-	 * @param password - symmetric key
-	 * @param members  - group members; nil for personal message
-	 * @return SecureMessage object
-	 */
-	Encrypt(password SymmetricKey, members []ID) SecureMessage
-}
-
-func InstantMessageGetContent(msg map[string]interface{}) Content {
-	return ContentParse(msg["content"])
+	/*/
+	// only for rebuild content
+	SetContent(body Content)
+	/*/
 }
 
 /**
@@ -94,7 +73,7 @@ type InstantMessageFactory interface {
 	 * @param now     - message time
 	 * @return SN (serial number as msg id)
 	 */
-	GenerateSerialNumber(msgType ContentType, now Time) uint64
+	GenerateSerialNumber(msgType ContentType, now Time) SerialNumberType
 
 	/**
 	 *  Create instant message with envelope & content
@@ -111,45 +90,34 @@ type InstantMessageFactory interface {
 	 * @param msg - message info
 	 * @return InstantMessage
 	 */
-	ParseInstantMessage(msg map[string]interface{}) InstantMessage
-}
-
-//
-//  Instance of InstantMessageFactory
-//
-var instantFactory InstantMessageFactory = nil
-
-func InstantMessageSetFactory(factory InstantMessageFactory) {
-	instantFactory = factory
-}
-
-func InstantMessageGetFactory() InstantMessageFactory {
-	return instantFactory
+	ParseInstantMessage(msg StringKeyMap) InstantMessage
 }
 
 //
 //  Factory methods
 //
-func InstantMessageCreate(head Envelope, body Content) InstantMessage {
-	factory := InstantMessageGetFactory()
-	return factory.CreateInstantMessage(head, body)
+
+func CreateInstantMessage(head Envelope, body Content) InstantMessage {
+	helper := GetInstantMessageHelper()
+	return helper.CreateInstantMessage(head, body)
 }
 
-func InstantMessageParse(msg interface{}) InstantMessage {
-	if ValueIsNil(msg) {
-		return nil
-	}
-	value, ok := msg.(InstantMessage)
-	if ok {
-		return value
-	}
-	info := FetchMap(msg)
-	// create by message factory
-	factory := InstantMessageGetFactory()
-	return factory.ParseInstantMessage(info)
+func ParseInstantMessage(msg interface{}) InstantMessage {
+	helper := GetInstantMessageHelper()
+	return helper.ParseInstantMessage(msg)
 }
 
-func InstantMessageGenerateSerialNumber(msgType ContentType, now Time) uint64 {
-	factory := InstantMessageGetFactory()
-	return factory.GenerateSerialNumber(msgType, now)
+func GenerateSerialNumber(msgType ContentType, now Time) SerialNumberType {
+	helper := GetInstantMessageHelper()
+	return helper.GenerateSerialNumber(msgType, now)
+}
+
+func GetInstantMessageFactory() InstantMessageFactory {
+	helper := GetInstantMessageHelper()
+	return helper.GetInstantMessageFactory()
+}
+
+func SetInstantMessageFactory(factory InstantMessageFactory) {
+	helper := GetInstantMessageHelper()
+	helper.SetInstantMessageFactory(factory)
 }
