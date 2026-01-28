@@ -31,7 +31,6 @@
 package protocol
 
 import (
-	. "github.com/dimchat/dkd-go/ext"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 )
@@ -64,10 +63,10 @@ type SerialNumberType = uint64
 type Content interface {
 	Mapper
 
-	Type() ContentType     // content type
-	SN() SerialNumberType  // serial number as message id
+	Type() ContentType    // content type
+	SN() SerialNumberType // serial number as message id
 
-	Time() Time            // message time
+	Time() Time // message time
 
 	// Group ID/string for group message
 	//    if field 'group' exists, it means this is a group message

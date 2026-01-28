@@ -31,7 +31,6 @@
 package protocol
 
 import (
-	. "github.com/dimchat/dkd-go/ext"
 	. "github.com/dimchat/mkm-go/protocol"
 	. "github.com/dimchat/mkm-go/types"
 )
