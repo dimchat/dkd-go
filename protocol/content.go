@@ -35,7 +35,8 @@ import (
 	. "github.com/dimchat/mkm-go/types"
 )
 
-type ContentType = string
+// ContentType
+type MessageType = string
 
 type SerialNumberType = uint64
 
@@ -63,7 +64,7 @@ type SerialNumberType = uint64
 type Content interface {
 	Mapper
 
-	Type() ContentType    // content type
+	Type() MessageType    // content type
 	SN() SerialNumberType // serial number as message id
 
 	Time() Time // message time
@@ -98,12 +99,12 @@ func ParseContent(content interface{}) Content {
 	return helper.ParseContent(content)
 }
 
-func GetContentFactory(msgType ContentType) ContentFactory {
+func GetContentFactory(msgType MessageType) ContentFactory {
 	helper := GetContentHelper()
 	return helper.GetContentFactory(msgType)
 }
 
-func SetContentFactory(msgType ContentType, factory ContentFactory) {
+func SetContentFactory(msgType MessageType, factory ContentFactory) {
 	helper := GetContentHelper()
 	helper.SetContentFactory(msgType, factory)
 }

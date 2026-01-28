@@ -72,7 +72,7 @@ type InstantMessageFactory interface {
 	 * @param now     - message time
 	 * @return SN (serial number as msg id)
 	 */
-	GenerateSerialNumber(msgType ContentType, now Time) SerialNumberType
+	GenerateSerialNumber(msgType MessageType, now Time) SerialNumberType
 
 	/**
 	 *  Create instant message with envelope & content
@@ -106,7 +106,7 @@ func ParseInstantMessage(msg interface{}) InstantMessage {
 	return helper.ParseInstantMessage(msg)
 }
 
-func GenerateSerialNumber(msgType ContentType, now Time) SerialNumberType {
+func GenerateSerialNumber(msgType MessageType, now Time) SerialNumberType {
 	helper := GetInstantMessageHelper()
 	return helper.GenerateSerialNumber(msgType, now)
 }

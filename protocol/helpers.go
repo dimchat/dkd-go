@@ -39,8 +39,8 @@ import (
  *  Content Helper
  */
 type ContentHelper interface {
-	SetContentFactory(msgType ContentType, factory ContentFactory)
-	GetContentFactory(msgType ContentType) ContentFactory
+	SetContentFactory(msgType MessageType, factory ContentFactory)
+	GetContentFactory(msgType MessageType) ContentFactory
 
 	ParseContent(content interface{}) Content
 }
@@ -88,7 +88,7 @@ type InstantMessageHelper interface {
 
 	CreateInstantMessage(head Envelope, body Content) InstantMessage
 
-	GenerateSerialNumber(msgType ContentType, now Time) SerialNumberType
+	GenerateSerialNumber(msgType MessageType, now Time) SerialNumberType
 }
 
 var sharedInstantMessageHelper InstantMessageHelper = nil

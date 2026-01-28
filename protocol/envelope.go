@@ -86,8 +86,8 @@ type Envelope interface {
 	 *  we pick out the content type and set it in envelope
 	 *  to let the station do its job.
 	 */
-	Type() ContentType
-	SetType(msgType ContentType)
+	Type() MessageType
+	SetType(msgType MessageType)
 }
 
 /**

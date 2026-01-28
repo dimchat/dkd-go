@@ -85,10 +85,10 @@ type Message interface {
 
 	//--------
 
-	Sender() ID         // envelope.sender
-	Receiver() ID       // envelope.receiver
-	Time() Time         // content.time or envelope.time
+	Sender() ID   // envelope.sender
+	Receiver() ID // envelope.receiver
+	Time() Time   // content.time or envelope.time
 
-	Group() ID          // content.group or envelope.group
-	Type() ContentType  // content.type or envelope.type
+	Group() ID         // content.group or envelope.group
+	Type() MessageType // content.type or envelope.type
 }

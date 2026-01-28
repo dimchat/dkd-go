@@ -48,7 +48,7 @@ type GeneralMessageHelper interface {
 	//
 	//  Message Type
 	//
-	GetContentType(content StringKeyMap, defaultValue ContentType) ContentType
+	GetContentType(content StringKeyMap, defaultValue MessageType) MessageType
 }
 
 var sharedGeneralMessageHelper GeneralMessageHelper = nil
