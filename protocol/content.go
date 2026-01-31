@@ -108,3 +108,29 @@ func SetContentFactory(msgType MessageType, factory ContentFactory) {
 	helper := GetContentHelper()
 	helper.SetContentFactory(msgType, factory)
 }
+
+//
+//  Conveniences
+//
+
+func ContentConvert(array interface{}) []Content {
+	values := FetchList(array)
+	contents := make([]Content, 0, len(values))
+	var msg Content
+	for _, item := range values {
+		msg = ParseContent(item)
+		if msg == nil {
+			continue
+		}
+		contents = append(contents, msg)
+	}
+	return contents
+}
+
+func ContentRevert(contents []Content) []StringKeyMap {
+	array := make([]StringKeyMap, len(contents))
+	for idx, msg := range contents {
+		array[idx] = msg.Map()
+	}
+	return array
+}

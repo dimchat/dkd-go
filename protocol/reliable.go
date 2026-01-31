@@ -99,3 +99,29 @@ func SetReliableMessageFactory(factory ReliableMessageFactory) {
 	helper := GetReliableMessageHelper()
 	helper.SetReliableMessageFactory(factory)
 }
+
+//
+//  Conveniences
+//
+
+func ReliableMessageConvert(array interface{}) []ReliableMessage {
+	values := FetchList(array)
+	messages := make([]ReliableMessage, 0, len(values))
+	var msg ReliableMessage
+	for _, item := range values {
+		msg = ParseReliableMessage(item)
+		if msg == nil {
+			continue
+		}
+		messages = append(messages, msg)
+	}
+	return messages
+}
+
+func ReliableMessageRevert(messages []ReliableMessage) []StringKeyMap {
+	array := make([]StringKeyMap, len(messages))
+	for idx, msg := range messages {
+		array[idx] = msg.Map()
+	}
+	return array
+}

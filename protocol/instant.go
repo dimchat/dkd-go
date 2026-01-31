@@ -120,3 +120,29 @@ func SetInstantMessageFactory(factory InstantMessageFactory) {
 	helper := GetInstantMessageHelper()
 	helper.SetInstantMessageFactory(factory)
 }
+
+//
+//  Conveniences
+//
+
+func InstantMessageConvert(array interface{}) []InstantMessage {
+	values := FetchList(array)
+	messages := make([]InstantMessage, 0, len(values))
+	var msg InstantMessage
+	for _, item := range values {
+		msg = ParseInstantMessage(item)
+		if msg == nil {
+			continue
+		}
+		messages = append(messages, msg)
+	}
+	return messages
+}
+
+func InstantMessageRevert(messages []InstantMessage) []StringKeyMap {
+	array := make([]StringKeyMap, len(messages))
+	for idx, msg := range messages {
+		array[idx] = msg.Map()
+	}
+	return array
+}
