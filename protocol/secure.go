@@ -35,28 +35,24 @@ import (
 	. "github.com/dimchat/mkm-go/types"
 )
 
-/**
- *  Secure Message
- *  <p>
- *      Instant Message encrypted by a symmetric key
- *  </p>
- *
- *  <blockquote><pre>
- *  data format: {
- *      //-- envelope
- *      "sender"   : "moki@xxx",
- *      "receiver" : "hulk@yyy",
- *      "time"     : 123,
- *
- *      //-- content data and key/keys
- *      "data"     : "...",  // base64_encode( symmetric_encrypt(content))
- *      "keys"     : {
- *          "{ID}"   : "...",  // base64_encode(asymmetric_encrypt(pwd))
- *          "digest" : "..."   // hash(pwd.data)
- *      }
- *  }
- *  </pre></blockquote>
- */
+// SecureMessage represents an InstantMessage that has been encrypted using a symmetric key.
+//
+// It ensures the confidentiality of the message content by encrypting the payload
+// and securely managing the symmetric key for recipients.
+//
+//	data format: {
+//		//-- envelope
+//		"sender"   : "moki@xxx",
+//		"receiver" : "hulk@yyy",
+//		"time"     : 123,
+//
+//		//-- content data and keys
+//		"data"     : "...",    // base64_encode( symmetric_encrypt(content))
+//		"keys"     : {
+//			"{ID}"   : "...",  // base64_encode(asymmetric_encrypt(pwd))
+//			"digest" : "..."   // hash(pwd.data)
+//		}
+//	}
 type SecureMessage interface {
 	Message
 

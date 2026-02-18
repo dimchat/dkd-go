@@ -40,27 +40,22 @@ type MessageType = string
 
 type SerialNumberType = uint64
 
-/**
- *  Message Content
- *  <p>
- *      This class is for creating message content
- *  </p>
- *
- *  <blockquote><pre>
- *  data format: {
- *      "type"    : i2s(0),         // message type
- *      "sn"      : 0,              // serial number
- *
- *      "time"    : 123,            // message time
- *      "group"   : "{GroupID}",    // for group message
- *
- *      //-- message info
- *      "text"    : "text",         // for text message
- *      "command" : "Command Name"  // for system command
- *      //...
- *  }
- *  </pre></blockquote>
- */
+// Content defines the interface for creating message content.
+//
+// It encapsulates various message types and their associated data.
+//
+//	data format: {
+//		"type"    : i2s(0),         // message type
+//		"sn"      : 0,              // serial number
+//
+//		"time"    : 123,            // message time
+//		"group"   : "{GroupID}",    // for group message
+//
+//		//-- message info
+//		"text"    : "text",         // for text message
+//		"command" : "Command Name"  // for system command
+//		//...
+//	}
 type Content interface {
 	Mapper
 

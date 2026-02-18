@@ -55,28 +55,20 @@ import (
  *         signature = sender.private_key.sign(data)
  */
 
-/**
- *  Message with Envelope
- *  <p>
- *      Base classes for messages
- *  </p>
- *  <p>
- *      This class is used to create a message
- *      with the envelope fields, such as 'sender', 'receiver', and 'time'
- *  </p>
- *
- *  <blockquote><pre>
- *  data format: {
- *      //-- envelope
- *      "sender"   : "moki@xxx",
- *      "receiver" : "hulk@yyy",
- *      "time"     : 123,
- *
- *      //-- body
- *      ...
- *  }
- *  </pre></blockquote>
- */
+// Message defines a base message structure that integrates an Envelope and a message body.
+//
+// This interface serves as the foundation for various message types, providing
+// common attributes like sender, receiver, and timestamp.
+//
+//	data format: {
+//		//-- envelope
+//		"sender"   : "moki@xxx",
+//		"receiver" : "hulk@yyy",
+//		"time"     : 123,
+//
+//		//-- body
+//		...
+//	}
 type Message interface {
 	Mapper
 

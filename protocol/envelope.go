@@ -35,21 +35,15 @@ import (
 	. "github.com/dimchat/mkm-go/types"
 )
 
-/**
- *  Envelope for message
- *  <p>
- *      This class is used to create a message envelope
- *      which contains 'sender', 'receiver' and 'time'
- *  </p>
- *
- *  <blockquote><pre>
- *  data format: {
- *      "sender"   : "moki@xxx",
- *      "receiver" : "hulk@yyy",
- *      "time"     : 123
- *  }
- *  </pre></blockquote>
- */
+// Envelope defines a message envelope, encapsulating routing and timing information.
+//
+// It typically contains details such as the message's sender, receiver, and timestamp.
+//
+//	data format: {
+//		"sender"   : "moki@xxx",
+//		"receiver" : "hulk@yyy",
+//		"time"     : 123
+//	}
 type Envelope interface {
 	Mapper
 

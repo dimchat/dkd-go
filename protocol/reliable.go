@@ -35,31 +35,27 @@ import (
 	. "github.com/dimchat/mkm-go/types"
 )
 
-/**
- *  Reliable Message signed by an asymmetric key
- *  <p>
- *      This class is used to sign the SecureMessage.
- *      It contains a 'signature' field which signed with sender's private key
- *  </p>
- *
- *  <blockquote><pre>
- *  data format: {
- *      //-- envelope
- *      "sender"   : "moki@xxx",
- *      "receiver" : "hulk@yyy",
- *      "time"     : 123,
- *
- *      //-- content data and key/keys
- *      "data"     : "...",  // base64_encode( symmetric_encrypt(content))
- *      "keys"     : {
- *          "{ID}"   : "...",  // base64_encode(asymmetric_encrypt(pwd))
- *          "digest" : "..."   // hash(pwd.data)
- *      },
- *      //-- signature
- *      "signature": "..."   // base64_encode(asymmetric_sign(data))
- *  }
- *  </pre></blockquote>
- */
+// ReliableMessage represents a SecureMessage signed by an asymmetric key, ensuring authenticity and integrity.
+//
+// It enhances security by including a digital signature, generated using the sender's private key.
+// This signature allows recipients to verify the message's origin and confirm that its content
+// has not been tampered with since it was signed.
+//
+//	data format: {
+//		//-- envelope
+//		"sender"   : "moki@xxx",
+//		"receiver" : "hulk@yyy",
+//		"time"     : 123,
+//
+//		//-- content data and keys
+//		"data"     : "...",    // base64_encode( symmetric_encrypt(content))
+//		"keys"     : {
+//			"{ID}"   : "...",  // base64_encode(asymmetric_encrypt(pwd))
+//			"digest" : "..."   // hash(pwd.data)
+//		},
+//		//-- signature
+//		"signature": "..."     // base64_encode(asymmetric_sign(data))
+//	}
 type ReliableMessage interface {
 	SecureMessage
 

@@ -34,21 +34,20 @@ import (
 	. "github.com/dimchat/mkm-go/types"
 )
 
-/**
- *  Instant Message
- *
- *  <blockquote><pre>
- *  data format: {
- *      //-- envelope
- *      "sender"   : "moki@xxx",
- *      "receiver" : "hulk@yyy",
- *      "time"     : 123,
- *
- *      //-- content
- *      "content"  : {...}
- *  }
- *  </pre></blockquote>
- */
+// InstantMessage represents a message type designed for immediate delivery,
+// extending the base Message with a dedicated content payload.
+//
+// It includes standard envelope fields along with the actual message content.
+//
+//	data format: {
+//			//-- envelope
+//			"sender"   : "moki@xxx",
+//			"receiver" : "hulk@yyy",
+//			"time"     : 123,
+//
+//			//-- content
+//			"content"  : {...}
+//		}
 type InstantMessage interface {
 	Message
 
