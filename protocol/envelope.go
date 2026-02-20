@@ -47,65 +47,52 @@ import (
 type Envelope interface {
 	Mapper
 
-	/**
-	 * Get message sender
-	 */
+	// Sender returns the message sender
 	Sender() ID
 
-	/**
-	 * Get message receiver
-	 */
+	// Receiver returns the message receiver
 	Receiver() ID
 
-	/**
-	 * Get message time
-	 */
+	// Time returns the message time
 	Time() Time
 
-	/*
-	 *  Group ID
-	 *  ~~~~~~~~
-	 *  when a group message was split/trimmed to a single message
-	 *  the 'receiver' will be changed to a member ID, and
-	 *  the group ID will be saved as 'group'.
-	 */
+	// Group returns the group ID
+	//
+	// When a group message was split/trimmed to a single message
+	// the 'receiver' will be changed to a member ID, and
+	// the group ID will be saved as 'group'.
 	Group() ID
 	SetGroup(group ID)
 
-	/*
-	 *  Message Type
-	 *  ~~~~~~~~~~~~
-	 *  because the message content will be encrypted, so
-	 *  the intermediate nodes(station) cannot recognize what kind of it.
-	 *  we pick out the content type and set it in envelope
-	 *  to let the station do its job.
-	 */
+	// Type returns the message type
+	//
+	// Because the message content will be encrypted, so
+	// the intermediate nodes(station) cannot recognize what kind of it.
+	// we pick out the content type and set it in envelope
+	// to let the station do its job.
 	Type() MessageType
 	SetType(msgType MessageType)
 }
 
-/**
- *  Envelope Factory
- *  ~~~~~~~~~~~~~~~~
- */
+// EnvelopeFactory creates and parses envelopes
 type EnvelopeFactory interface {
 
-	/**
-	 *  Create envelope
-	 *
-	 * @param from - sender ID
-	 * @param to   - receiver ID
-	 * @param when - message time
-	 * @return Envelope
-	 */
+	// CreateEnvelope creates a new envelope
+	//
+	// Parameters:
+	//   - from: sender ID
+	//   - to: receiver ID
+	//   - when: message time
+	// Returns:
+	//   - Envelope
 	CreateEnvelope(from, to ID, when Time) Envelope
 
-	/**
-	 *  Parse map object to envelope
-	 *
-	 * @param env - envelope info
-	 * @return Envelope
-	 */
+	// ParseEnvelope parses a map object to envelope
+	//
+	// Parameters:
+	//   - env: envelope info
+	// Returns:
+	//   - Envelope
 	ParseEnvelope(env StringKeyMap) Envelope
 }
 

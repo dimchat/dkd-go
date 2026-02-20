@@ -40,14 +40,14 @@ import (
 // It includes standard envelope fields along with the actual message content.
 //
 //	data format: {
-//			//-- envelope
-//			"sender"   : "moki@xxx",
-//			"receiver" : "hulk@yyy",
-//			"time"     : 123,
+//		//-- envelope
+//		"sender"   : "moki@xxx",
+//		"receiver" : "hulk@yyy",
+//		"time"     : 123,
 //
-//			//-- content
-//			"content"  : {...}
-//		}
+//		//-- content
+//		"content"  : {...}
+//	}
 type InstantMessage interface {
 	Message
 
@@ -60,34 +60,33 @@ type InstantMessage interface {
 
 /**
  *  Message Factory
- *  ~~~~~~~~~~~~~~~
  */
 type InstantMessageFactory interface {
 
-	/**
-	 *  Generate SN for message content
-	 *
-	 * @param msgType - content type
-	 * @param now     - message time
-	 * @return SN (serial number as msg id)
-	 */
+	// GenerateSerialNumber generates SN for message content
+	//
+	// Parameters:
+	//   - msgType: content type
+	//   - now: message time
+	// Returns:
+	//   - SN (serial number as msg id)
 	GenerateSerialNumber(msgType MessageType, now Time) SerialNumberType
 
-	/**
-	 *  Create instant message with envelope & content
-	 *
-	 * @param head - message envelope
-	 * @param body - message content
-	 * @return InstantMessage
-	 */
+	// CreateInstantMessage creates instant message with envelope & content
+	//
+	// Parameters:
+	//   - head: message envelope
+	//   - body: message content
+	// Returns:
+	//   - InstantMessage
 	CreateInstantMessage(head Envelope, body Content) InstantMessage
 
-	/**
-	 *  Parse map object to message
-	 *
-	 * @param msg - message info
-	 * @return InstantMessage
-	 */
+	// ParseInstantMessage parses map object to message
+	//
+	// Parameters:
+	//   - msg: message info
+	// Returns:
+	//   - InstantMessage
 	ParseInstantMessage(msg StringKeyMap) InstantMessage
 }
 
