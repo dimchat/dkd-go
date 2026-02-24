@@ -83,16 +83,14 @@ type EnvelopeFactory interface {
 	//   - from: sender ID
 	//   - to: receiver ID
 	//   - when: message time
-	// Returns:
-	//   - Envelope
+	// Returns: Envelope
 	CreateEnvelope(from, to ID, when Time) Envelope
 
 	// ParseEnvelope parses a map object to envelope
 	//
 	// Parameters:
 	//   - env: envelope info
-	// Returns:
-	//   - Envelope
+	// Returns: Envelope
 	ParseEnvelope(env StringKeyMap) Envelope
 }
 

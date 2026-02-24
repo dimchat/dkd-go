@@ -38,6 +38,7 @@ import (
 /**
  *  Message GeneralFactory
  */
+
 type GeneralMessageHelper interface {
 	//ContentHelper
 	//EnvelopeHelper

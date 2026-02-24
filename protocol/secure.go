@@ -65,14 +65,14 @@ type SecureMessage interface {
 /**
  *  Message Factory
  */
+
 type SecureMessageFactory interface {
 
 	// ParseSecureMessage parses a map object to secure message
 	//
 	// Parameters:
 	//   - msg: message info
-	// Returns:
-	//   - SecureMessage
+	// Returns: SecureMessage
 	ParseSecureMessage(msg StringKeyMap) SecureMessage
 }
 

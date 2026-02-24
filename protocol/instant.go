@@ -61,6 +61,7 @@ type InstantMessage interface {
 /**
  *  Message Factory
  */
+
 type InstantMessageFactory interface {
 
 	// GenerateSerialNumber generates SN for message content
@@ -68,8 +69,7 @@ type InstantMessageFactory interface {
 	// Parameters:
 	//   - msgType: content type
 	//   - now: message time
-	// Returns:
-	//   - SN (serial number as msg id)
+	// Returns: SN (serial number as msg id)
 	GenerateSerialNumber(msgType MessageType, now Time) SerialNumberType
 
 	// CreateInstantMessage creates instant message with envelope & content
@@ -77,16 +77,14 @@ type InstantMessageFactory interface {
 	// Parameters:
 	//   - head: message envelope
 	//   - body: message content
-	// Returns:
-	//   - InstantMessage
+	// Returns: InstantMessage
 	CreateInstantMessage(head Envelope, body Content) InstantMessage
 
 	// ParseInstantMessage parses map object to message
 	//
 	// Parameters:
 	//   - msg: message info
-	// Returns:
-	//   - InstantMessage
+	// Returns: InstantMessage
 	ParseInstantMessage(msg StringKeyMap) InstantMessage
 }
 

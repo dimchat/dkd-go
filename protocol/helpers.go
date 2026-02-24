@@ -38,6 +38,7 @@ import (
 /**
  *  Content Helper
  */
+
 type ContentHelper interface {
 	SetContentFactory(msgType MessageType, factory ContentFactory)
 	GetContentFactory(msgType MessageType) ContentFactory
@@ -58,6 +59,7 @@ func GetContentHelper() ContentHelper {
 /**
  *  Envelope Helper
  */
+
 type EnvelopeHelper interface {
 	SetEnvelopeFactory(factory EnvelopeFactory)
 	GetEnvelopeFactory() EnvelopeFactory
@@ -80,6 +82,7 @@ func GetEnvelopeHelper() EnvelopeHelper {
 /**
  *  InstantMessage Helper
  */
+
 type InstantMessageHelper interface {
 	SetInstantMessageFactory(factory InstantMessageFactory)
 	GetInstantMessageFactory() InstantMessageFactory
@@ -104,6 +107,7 @@ func GetInstantMessageHelper() InstantMessageHelper {
 /**
  *  SecureMessage Helper
  */
+
 type SecureMessageHelper interface {
 	SetSecureMessageFactory(factory SecureMessageFactory)
 	GetSecureMessageFactory() SecureMessageFactory
@@ -124,6 +128,7 @@ func GetSecureMessageHelper() SecureMessageHelper {
 /**
  *  ReliableMessage Helper
  */
+
 type ReliableMessageHelper interface {
 	SetReliableMessageFactory(factory ReliableMessageFactory)
 	GetReliableMessageFactory() ReliableMessageFactory

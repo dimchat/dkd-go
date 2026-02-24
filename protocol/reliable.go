@@ -65,14 +65,14 @@ type ReliableMessage interface {
 /**
  *  Message Factory
  */
+
 type ReliableMessageFactory interface {
 
 	// ParseReliableMessage parses a map object to reliable message
 	//
 	// Parameters:
 	//   - msg: message info
-	// Returns:
-	//   - ReliableMessage
+	// Returns: ReliableMessage
 	ParseReliableMessage(msg StringKeyMap) ReliableMessage
 }
 

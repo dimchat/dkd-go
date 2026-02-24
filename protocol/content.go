@@ -72,16 +72,15 @@ type Content interface {
 
 /**
  *  Content Factory
- *  ~~~~~~~~~~~~~~~
  */
+
 type ContentFactory interface {
 
 	// ParseContent parses a map object to content
 	//
 	// Parameters:
 	//   - content: content info
-	// Returns:
-	//   - Content
+	// Returns: Content
 	ParseContent(content StringKeyMap) Content
 }
 
