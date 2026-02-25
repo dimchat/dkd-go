@@ -80,7 +80,7 @@ type ReliableMessageFactory interface {
 //  Factory method
 //
 
-func ParseReliableMessage(msg interface{}) ReliableMessage {
+func ParseReliableMessage(msg any) ReliableMessage {
 	helper := GetReliableMessageHelper()
 	return helper.ParseReliableMessage(msg)
 }
@@ -99,7 +99,7 @@ func SetReliableMessageFactory(factory ReliableMessageFactory) {
 //  Conveniences
 //
 
-func ReliableMessageConvert(array interface{}) []ReliableMessage {
+func ReliableMessageConvert(array any) []ReliableMessage {
 	values := FetchList(array)
 	messages := make([]ReliableMessage, 0, len(values))
 	var msg ReliableMessage

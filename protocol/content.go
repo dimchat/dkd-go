@@ -40,27 +40,27 @@ type MessageType = string
 
 type SerialNumberType = uint64
 
-// Content defines the interface for creating message content.
+// Content defines the core interface for message content in the system
 //
 // It encapsulates various message types and their associated data.
 //
 //	data format: {
 //		"type"    : i2s(0),         // message type
-//		"sn"      : 0,              // serial number
+//		"sn"      : 0,              // unique serial number
 //
 //		"time"    : 123,            // message time
-//		"group"   : "{GroupID}",    // for group message
+//		"group"   : "{GroupID}",    // for group message (OPTIONAL)
 //
-//		//-- message info
+//		//-- message-specific fields (varies by message type)
 //		"text"    : "text",         // for text message
 //		"command" : "Command Name"  // for system command
-//		//...
+//		//... additional fields for other message types
 //	}
 type Content interface {
 	Mapper
 
 	Type() MessageType    // content type
-	SN() SerialNumberType // serial number as message id
+	SN() SerialNumberType // unique serial number as message id
 
 	Time() Time // message time
 
@@ -88,7 +88,7 @@ type ContentFactory interface {
 //  Factory method
 //
 
-func ParseContent(content interface{}) Content {
+func ParseContent(content any) Content {
 	helper := GetContentHelper()
 	return helper.ParseContent(content)
 }
@@ -107,7 +107,7 @@ func SetContentFactory(msgType MessageType, factory ContentFactory) {
 //  Conveniences
 //
 
-func ContentConvert(array interface{}) []Content {
+func ContentConvert(array any) []Content {
 	values := FetchList(array)
 	contents := make([]Content, 0, len(values))
 	var msg Content

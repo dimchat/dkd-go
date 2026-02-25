@@ -103,7 +103,7 @@ func CreateEnvelope(from, to ID, when Time) Envelope {
 	return helper.CreateEnvelope(from, to, when)
 }
 
-func ParseEnvelope(env interface{}) Envelope {
+func ParseEnvelope(env any) Envelope {
 	helper := GetEnvelopeHelper()
 	return helper.ParseEnvelope(env)
 }

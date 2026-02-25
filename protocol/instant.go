@@ -30,9 +30,7 @@
  */
 package protocol
 
-import (
-	. "github.com/dimchat/mkm-go/types"
-)
+import . "github.com/dimchat/mkm-go/types"
 
 // InstantMessage represents a message type designed for immediate delivery,
 // extending the base Message with a dedicated content payload.
@@ -97,7 +95,7 @@ func CreateInstantMessage(head Envelope, body Content) InstantMessage {
 	return helper.CreateInstantMessage(head, body)
 }
 
-func ParseInstantMessage(msg interface{}) InstantMessage {
+func ParseInstantMessage(msg any) InstantMessage {
 	helper := GetInstantMessageHelper()
 	return helper.ParseInstantMessage(msg)
 }
@@ -121,7 +119,7 @@ func SetInstantMessageFactory(factory InstantMessageFactory) {
 //  Conveniences
 //
 
-func InstantMessageConvert(array interface{}) []InstantMessage {
+func InstantMessageConvert(array any) []InstantMessage {
 	values := FetchList(array)
 	messages := make([]InstantMessage, 0, len(values))
 	var msg InstantMessage

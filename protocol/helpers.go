@@ -43,7 +43,7 @@ type ContentHelper interface {
 	SetContentFactory(msgType MessageType, factory ContentFactory)
 	GetContentFactory(msgType MessageType) ContentFactory
 
-	ParseContent(content interface{}) Content
+	ParseContent(content any) Content
 }
 
 var sharedContentHelper ContentHelper = nil
@@ -64,7 +64,7 @@ type EnvelopeHelper interface {
 	SetEnvelopeFactory(factory EnvelopeFactory)
 	GetEnvelopeFactory() EnvelopeFactory
 
-	ParseEnvelope(env interface{}) Envelope
+	ParseEnvelope(env any) Envelope
 
 	CreateEnvelope(from, to ID, when Time) Envelope
 }
@@ -87,7 +87,7 @@ type InstantMessageHelper interface {
 	SetInstantMessageFactory(factory InstantMessageFactory)
 	GetInstantMessageFactory() InstantMessageFactory
 
-	ParseInstantMessage(msg interface{}) InstantMessage
+	ParseInstantMessage(msg any) InstantMessage
 
 	CreateInstantMessage(head Envelope, body Content) InstantMessage
 
@@ -112,7 +112,7 @@ type SecureMessageHelper interface {
 	SetSecureMessageFactory(factory SecureMessageFactory)
 	GetSecureMessageFactory() SecureMessageFactory
 
-	ParseSecureMessage(msg interface{}) SecureMessage
+	ParseSecureMessage(msg any) SecureMessage
 }
 
 var sharedSecureMessageHelper SecureMessageHelper = nil
@@ -133,7 +133,7 @@ type ReliableMessageHelper interface {
 	SetReliableMessageFactory(factory ReliableMessageFactory)
 	GetReliableMessageFactory() ReliableMessageFactory
 
-	ParseReliableMessage(msg interface{}) ReliableMessage
+	ParseReliableMessage(msg any) ReliableMessage
 }
 
 var sharedReliableMessageHelper ReliableMessageHelper = nil

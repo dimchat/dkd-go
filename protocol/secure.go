@@ -80,7 +80,7 @@ type SecureMessageFactory interface {
 //  Factory method
 //
 
-func ParseSecureMessage(msg interface{}) SecureMessage {
+func ParseSecureMessage(msg any) SecureMessage {
 	helper := GetSecureMessageHelper()
 	return helper.ParseSecureMessage(msg)
 }
